@@ -7,6 +7,12 @@ namespace Assets.Scripts.Camera
 {
     public class CameraControl : MonoBehaviour
     {
+        [SerializeField]
+        InputSettings inputSettings;
+
+        // Flag to determine if the user is pressing the screen.
+        bool isPressing = false;
+
         // Flag to determine if the user is holding the screen.
         bool isHolding = false;
 
@@ -18,6 +24,11 @@ namespace Assets.Scripts.Camera
         /// </summary>
         void OnPress()
         {
+            isPressing = true;
+        }
+
+        void OnHold()
+        {
             isHolding = true;
         }
 
@@ -26,6 +37,7 @@ namespace Assets.Scripts.Camera
         /// </summary>
         void OnRelease()
         {
+            isPressing = false;
             isHolding = false;
         }
 
