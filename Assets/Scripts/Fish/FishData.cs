@@ -6,8 +6,8 @@ namespace Assets.Scripts.Fish
 	public readonly struct FishData
 	{
 		public readonly FishTypeData Type;
-	 	public readonly float MinWeight;
-	 	public readonly float MaxWeight;
+		public readonly float MinWeight;
+		public readonly float MaxWeight;
 
 		public FishData(FishTypeData type, float minWeight, float maxWeight)
 		{
