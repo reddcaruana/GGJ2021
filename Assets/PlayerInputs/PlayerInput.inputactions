@@ -33,17 +33,6 @@
             "bindings": [
                 {
                     "name": "",
-                    "id": "6ee940c4-2a75-4aa1-a67b-d93a99a1aac5",
-                    "path": "<Mouse>/leftButton",
-                    "interactions": "Press",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Press",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "aaab74b4-4906-476a-a4f5-bb644320b1a9",
                     "path": "<Mouse>/leftButton",
                     "interactions": "Press(behavior=1)",
@@ -56,11 +45,22 @@
                 {
                     "name": "",
                     "id": "5f4815e4-e5ff-4ab9-818a-5d484ca31818",
-                    "path": "<Mouse>/delta",
+                    "path": "<Mouse>/position",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "06cdb053-493c-4f7b-aacd-68e8f7dfc621",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Press",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
