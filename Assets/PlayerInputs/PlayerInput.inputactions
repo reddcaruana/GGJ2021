@@ -6,16 +6,24 @@
             "id": "5509c7b5-cded-4766-84f6-01edd67501c2",
             "actions": [
                 {
-                    "name": "Press",
-                    "type": "Button",
+                    "name": "Tap",
+                    "type": "PassThrough",
                     "id": "429c008b-7c0c-470a-bfbd-e3aff38d0ebe",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
                 },
                 {
+                    "name": "Press",
+                    "type": "PassThrough",
+                    "id": "bc5e0b44-a0f1-495a-8c8c-0655ca8370d0",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
                     "name": "Release",
-                    "type": "Button",
+                    "type": "PassThrough",
                     "id": "612998fe-c4fe-4ae6-8efe-f7cf2a1ca0e5",
                     "expectedControlType": "Button",
                     "processors": "",
@@ -23,7 +31,7 @@
                 },
                 {
                     "name": "Move",
-                    "type": "Value",
+                    "type": "PassThrough",
                     "id": "dca913f0-00c3-4425-8db4-67063907200e",
                     "expectedControlType": "Vector2",
                     "processors": "",
@@ -56,6 +64,17 @@
                 {
                     "name": "",
                     "id": "06cdb053-493c-4f7b-aacd-68e8f7dfc621",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Tap",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Tap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c6e2abde-34cf-472f-bae4-73da50d43713",
                     "path": "<Mouse>/leftButton",
                     "interactions": "Press",
                     "processors": "",
