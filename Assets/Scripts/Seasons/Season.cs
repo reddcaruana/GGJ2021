@@ -103,8 +103,14 @@ namespace Assets.Scripts.Seasons
 
 		public void OnCast(Vector3 wordlPosition)
 		{
-			//for (int i = 0; i < fishControllers.Length; i++)
-			//	fishControllers[i].OnCast()
+			Vector3 localPosition;
+			if (HasView)
+				localPosition = view.transform.InverseTransformPoint(wordlPosition);
+			else
+				localPosition = wordlPosition;
+
+			for (int i = 0; i < fishControllers.Length; i++)
+				fishControllers[i].OnCast(localPosition);
 		}
 	}
 }

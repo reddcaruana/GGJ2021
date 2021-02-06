@@ -41,8 +41,8 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		public void UnregiisterFromCoolDownComplete(Action<FishController> callback) =>
 			onCoolDownComplete -= callback;
 
-		public bool InFearProximity(Vector2 position) => InProximity(proximityFear, position);
-		public bool InBiteProximity(Vector2 position) => InProximity(proximityBite, position);
+		public bool InFearProximity(Vector2 localPosition) => InProximity(proximityFear / 2f, localPosition);
+		public bool InBiteProximity(Vector2 localPosition) => InProximity(proximityBite / 2f, localPosition);
 
 		public override void OnCast(Vector3 localPosition)
 		{
@@ -63,15 +63,18 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			Debug.Log("[FishController] Escape");
 
 			if (HasView)
-				view.Escape();
+				view.Escape(null);
 
 			CoolDown();
 		}
 
-		private void ApproachFloat(Vector2 floatPosition)
+		private void ApproachFloat(Vector2 floatLocalPosition)
 		{
 			Debug.Log("[FishController] Approach");
 			isAvailable = false;
+
+			if (HasView)
+				view.ApprochFloat(floatLocalPosition);
 		}
 
 		private void CoolDown()

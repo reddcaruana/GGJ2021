@@ -8,6 +8,7 @@ namespace Assets.Scripts.Views.Fish
 {
 	public class FishView : MonoBehaviour
 	{
+		private static readonly Color SOLID_COLOR = Statics.COLOR_BLACK;
 		private SpriteRenderer spriteRenderer;
 		private Vector3 startPos = new Vector3();
 		private Vector3 endPos = new Vector3();
@@ -56,7 +57,7 @@ namespace Assets.Scripts.Views.Fish
 				.OnComplete(() => onComplete());
 
 			spriteRenderer.color = Statics.COLOR_ZERO;
-			spriteRenderer.DOColor(Statics.COLOR_BLACK, duration)
+			spriteRenderer.DOColor(SOLID_COLOR, duration)
 				.SetEase(Ease.InOutSine);
 		}
 
@@ -68,9 +69,29 @@ namespace Assets.Scripts.Views.Fish
 			spriteRenderer.transform.RotateAround(transform.position, Vector3.forward, 20 * Time.deltaTime);
 		}
 
-		public void Escape()
+		public void Escape(Action onComplete = null)
 		{
-			throw new NotImplementedException();
+			const float duration = 1f;
+
+			isIdle = false;
+
+			spriteRenderer.transform.DOLocalMoveY(startPos.y, duration)
+				.SetEase(Ease.InOutSine)
+				.OnComplete(() => onComplete?.Invoke());
+
+			spriteRenderer.color = SOLID_COLOR;
+			spriteRenderer.DOColor(Statics.COLOR_ZERO, duration)
+				.SetEase(Ease.InOutSine);
+		}
+
+		public void ApprochFloat(Vector3 localPosition, Action onComplete = null)
+		{
+			const float duration = 1f;
+
+			isIdle = false;
+			spriteRenderer.transform.DOLocalMove(localPosition, duration)
+				.SetEase(Ease.InOutSine)
+				.OnComplete(() => onComplete?.Invoke());
 		}
 
 		private int lastDebugLayer = -1;

@@ -2,6 +2,7 @@
 using Assets.Scripts.Constants;
 using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.AquaticCreatures.Fish;
+using Assets.Scripts.Framework;
 
 namespace Assets.Scripts.AquaticCreatures
 {
@@ -28,8 +29,8 @@ namespace Assets.Scripts.AquaticCreatures
 
 		protected abstract void SetInternal();
 
-		protected bool InProximity(float distance, Vector2 position) =>
-			MathUtils.IsInCircualarArea(GetPosition(), distance, position);
+		protected bool InProximity(float distance, Vector2 localPosition) =>
+			MathUtils.IsInCircualarArea(Statics.VECTOR2_ZERO, distance, localPosition);
 
 		public abstract Vector3 GetPosition();
 

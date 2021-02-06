@@ -1,10 +1,9 @@
 ﻿using UnityEngine;
+using Assets.Scripts.Rods;
 using Assets.Scripts.Seasons;
+using UnityEngine.InputSystem;
 using Assets.Scripts.Framework;
 using Assets.Scripts.Framework.Tools;
-using Assets.Scripts.Rods;
-using UnityEngine.InputSystem;
-using Assets.Scripts.Framework.Utils;
 
 namespace Assets.Scripts.Controllers
 {
@@ -14,19 +13,19 @@ namespace Assets.Scripts.Controllers
 
 		public Season CurrentSeason { get; private set; }
 		private RodBase rod;
-		private Transform TestPernt;
+		private Transform TestParent;
 
 		protected override void Awake()
 		{
 			base.Awake();
-			TestPernt = new GameObject("MainParent").transform;
+			TestParent = new GameObject("MainParent").transform;
 			GameFactory.Start();
 		}
 
 		private void Start()
 		{
 			Season seasons = new Summer();
-			seasons.CreateView(TestPernt);
+			seasons.CreateView(TestParent);
 			seasons.CreateFishViews();
 			seasons.SetAllFish();
 			seasons.DistriubuteFish();
@@ -34,7 +33,7 @@ namespace Assets.Scripts.Controllers
 			CurrentSeason = seasons;
 
 			rod = new BasicRod();
-			rod.CreateView(TestPernt);
+			rod.CreateView(TestParent);
 			rod.RegisterToOnCastComnplete(CurrentSeason.OnCast);
 		}
 

@@ -15,7 +15,7 @@ namespace Assets.Scripts.Seasons
 			FishWiki.Vopa
 		};
 
-		public override int MaxFish { get; } = 5;
+		public override int MaxFish { get; } = 1;
 
 	}
 }
