@@ -7,9 +7,9 @@ namespace Assets.Scripts.Paywalls
 {
     public readonly struct PaywallData
     {
-        public readonly FishTypeData[] Requirements;
+        public readonly FishData[] Requirements;
 
-        public PaywallData(FishTypeData[] requirements)
+        public PaywallData(FishData[] requirements)
         {
             Requirements = requirements;
         }
