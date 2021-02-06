@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Environment;
+using Assets.Scripts.Paywalls;
 using Assets.Scripts.Framework;
 using Assets.Scripts.Framework.Tools;
 
@@ -9,6 +10,7 @@ public class TestGameController : MonobehaviourSingleton<TestGameController>
 {
     public int maxStreams = 20;
     protected static StreamController[] streams;
+    protected static PaywallController paywall;
 
     protected override void Awake()
     {
@@ -24,5 +26,8 @@ public class TestGameController : MonobehaviourSingleton<TestGameController>
             streams[i] = new StreamController();
             streams[i].CreateView(null);
         }
+
+        paywall = new PaywallController();
+        paywall.CreateView(null);
     }
 }

@@ -31,6 +31,8 @@ namespace Assets.Scripts.Environment
             _renderer.color = new Color(1f, 1f, 1f, Random.Range(startingOpacity[0], startingOpacity[1]));
 
             speed += speedModifier - scale;
+            
+            // Temporary positioning
             transform.position = new Vector3(Random.value * 10f - 5f, Random.value * 50f + 10f, 0);
         }
 
