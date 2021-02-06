@@ -2,12 +2,18 @@
 using Assets.Scripts.Seasons;
 using Assets.Scripts.Framework;
 using Assets.Scripts.Framework.Tools;
+using Assets.Scripts.Rods;
+using UnityEngine.InputSystem;
+using Assets.Scripts.Framework.Utils;
 
 namespace Assets.Scripts.Controllers
 {
 	public class GameController : MonobehaviourSingleton<GameController>
 	{
-		public Season Current { get; private set; }
+		Vector2 mousePos;
+
+		public Season CurrentSeason { get; private set; }
+		private RodBase rod;
 		private Transform TestPernt;
 
 		protected override void Awake()
@@ -25,7 +31,22 @@ namespace Assets.Scripts.Controllers
 			seasons.SetAllFish();
 			seasons.DistriubuteFish();
 
-			Current = seasons;
+			CurrentSeason = seasons;
+
+			rod = new BasicRod();
+			rod.CreateView(TestPernt);
+			rod.RegisterToOnCastComnplete(CurrentSeason.OnCast);
+		}
+
+		private void OnPosition(InputValue inputValue)
+		{
+			Vector2 value = inputValue.Get<Vector2>();
+			mousePos = value;
+		}
+
+		private void OnClick()
+		{
+			rod.TryCast(mousePos);
 		}
 	}
 }

@@ -14,7 +14,7 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		private Action<FishController> onCoolDownComplete;
 		private float proximityFear;
 		private float proximityBite;
-		private Vector3 spawnPosition;
+		private Vector3 spawnLocalPosition;
 
 		public bool HasView => view != null;
 		private FishView view; 
@@ -27,7 +27,7 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			if (HasView)
 			{
 				view.Set(this);
-				view.CreateDebugAreaView(proximityFear, Color.red, "Fear");
+				view.CreateDebugAreaView(proximityFear, Color.yellow, "Fear");
 				view.CreateDebugAreaView(proximityBite, Color.green, "Bite");
 			}
 		}
@@ -35,7 +35,7 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		public void CreateView(Transform parent) =>
 			view = MonoBehaviour.Instantiate(AssetLoader.ME.Loader<FishView>("Prefabs/Fish/FishBase"), parent);
 
-		public void RegiisterToCoolDownComplete(Action<FishController> callback) =>
+		public void RegisterToCoolDownComplete(Action<FishController> callback) =>
 			onCoolDownComplete += callback;
 
 		public void UnregiisterFromCoolDownComplete(Action<FishController> callback) =>
@@ -44,12 +44,12 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		public bool InFearProximity(Vector2 position) => InProximity(proximityFear, position);
 		public bool InBiteProximity(Vector2 position) => InProximity(proximityBite, position);
 
-		public override void OnCast(Vector3 floatPosition)
+		public override void OnCast(Vector3 localPosition)
 		{
-			if (InFearProximity(floatPosition))
+			if (InFearProximity(localPosition))
 				Escape();
-			else if (InBiteProximity(floatPosition))
-				ApproachFloat(floatPosition);
+			else if (InBiteProximity(localPosition))
+				ApproachFloat(localPosition);
 		}
 
 		protected override void AppearInternal()
@@ -85,14 +85,14 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			}
 		}
 
-		public override Vector3 GetPosition() => spawnPosition;
+		public override Vector3 GetPosition() => spawnLocalPosition;
 
-		public void SetSpawnPoint(Vector3 position)
+		public void SetSpawnPoint(Vector3 localPosition)
 		{
-			spawnPosition = position;
+			spawnLocalPosition = localPosition;
 
 			if (HasView)
-				view.Reposition(position, proximityFear, proximityBite);
+				view.Reposition(localPosition, proximityFear, proximityBite);
 		}
 
 		private static float CalculateProximityFear(float size)

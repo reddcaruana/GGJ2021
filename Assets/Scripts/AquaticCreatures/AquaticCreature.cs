@@ -37,7 +37,6 @@ namespace Assets.Scripts.AquaticCreatures
 
 		public void Appear()
 		{
-			Debug.Log($"[{Data.Type.NiceName}] Appearing");
 			isAvailable = true;
 			AppearInternal();
 		}

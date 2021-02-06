@@ -1,0 +1,52 @@
+{
+    "name": "Alisa",
+    "maps": [
+        {
+            "name": "Player",
+            "id": "23082180-fc82-4aa8-bcb0-61b34818b9cd",
+            "actions": [
+                {
+                    "name": "Click",
+                    "type": "Button",
+                    "id": "5c1ddf29-23bd-4512-a828-31bce0195cd2",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Position",
+                    "type": "PassThrough",
+                    "id": "d119bcb8-5525-4c93-a000-62bcbfce7ce6",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "585e0952-1d64-4ab1-a958-1bc902a18ede",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Tap",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Click",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "35cc858f-0281-4a61-820c-d6e17a11a267",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Position",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

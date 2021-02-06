@@ -37,8 +37,6 @@ namespace Assets.Scripts.Views.Fish
 			transform.localPosition = localPosition;
 			startPos.y += proximityBite / 2f;
 			endPos.y -= proximityFear / 2f;
-
-			Debug.Log($"Start: {startPos}, End: {endPos}");
 		}
 
 		public Vector3 BoundSize() => spriteRenderer.bounds.size;

@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using Assets.Scripts.Constants;
+using Assets.Scripts.Framework;
+using Assets.Scripts.Controllers;
 using Assets.Scripts.Views.Seasons;
 using Assets.Scripts.AssetsManagers;
-using Assets.Scripts.AquaticCreatures.Fish;
 using Assets.Scripts.Framework.Utils;
-using Assets.Scripts.Framework;
+using Assets.Scripts.AquaticCreatures.Fish;
 
 namespace Assets.Scripts.Seasons
 {
@@ -24,9 +25,7 @@ namespace Assets.Scripts.Seasons
 
 		public Season()
 		{
-			float height = Camera.main.orthographicSize * 2.0f;
-			float width = height * Screen.width / Screen.height;
-			FishTankSize = new Vector2(width, height * NumberOfSegments);
+			FishTankSize = new Vector2(ViewController.Width, ViewController.Height * NumberOfSegments);
 
 			fishControllers = new FishController[MaxFish];
 			for (int i = 0; i < fishControllers.Length; i++)
@@ -62,7 +61,7 @@ namespace Assets.Scripts.Seasons
 		public void DistriubuteFish()
 		{
 			float verticalStep = FishTankSize.y / MaxFish;
-			Vector3 position = new Vector3()
+			Vector3 localPosition = new Vector3()
 			{
 				x = 0,
 				y = (FishTankSize.y / 2f) - (verticalStep / 2f)
@@ -70,9 +69,9 @@ namespace Assets.Scripts.Seasons
 
 			for (int i = 0; i < fishControllers.Length; i++)
 			{
-				fishControllers[i].SetSpawnPoint(position);
+				fishControllers[i].SetSpawnPoint(localPosition);
 				fishControllers[i].Appear();
-				position.y -= verticalStep;
+				localPosition.y -= verticalStep;
 			}
 		}
 
@@ -90,7 +89,7 @@ namespace Assets.Scripts.Seasons
 				return false;
 			}
 
-			worldPos = Camera.main.ScreenToWorldPoint(screenPosition);
+			worldPos = ViewController.MainCamera.ScreenToWorldPoint(screenPosition);
 			Vector3 topLftCorner = view.transform.position;
 			topLftCorner.x -= FishTankSize.x / 2f;
 			topLftCorner.y += FishTankSize.y / 2;
@@ -100,6 +99,12 @@ namespace Assets.Scripts.Seasons
 			bottomRightCorner.y -= FishTankSize.y;
 
 			return MathUtils.IsInRectArea(topLftCorner, bottomRightCorner, worldPos);
+		}
+
+		public void OnCast(Vector3 wordlPosition)
+		{
+			//for (int i = 0; i < fishControllers.Length; i++)
+			//	fishControllers[i].OnCast()
 		}
 	}
 }
