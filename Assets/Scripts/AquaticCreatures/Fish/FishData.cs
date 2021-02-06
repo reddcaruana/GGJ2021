@@ -1,8 +1,8 @@
-﻿
-namespace Assets.Scripts.Fish
-{
-	public enum FishType { Awrata, Vopa}
+﻿using UnityEngine;
+using  Assets.Scripts.Constants;
 
+namespace Assets.Scripts.AquaticCreatures.Fish
+{
 	public readonly struct FishData
 	{
 		public readonly FishTypeData Type;
@@ -15,6 +15,9 @@ namespace Assets.Scripts.Fish
 			MinWeight = minWeight;
 			MaxWeight = maxWeight;
 		}
+
+		public float GetRandomWeight() =>
+			Random.Range(MinWeight, MaxWeight);
 	}
 
 	public readonly struct FishTypeData
