@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using static Assets.Scripts.Constants.EnumList;
+using  Assets.Scripts.Constants;
 
-namespace Assets.Scripts.Fish
+namespace Assets.Scripts.AquaticCreatures.Fish
 {
 	public readonly struct FishData
 	{

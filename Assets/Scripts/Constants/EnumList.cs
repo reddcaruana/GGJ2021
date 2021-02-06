@@ -1,8 +1,5 @@
 ﻿namespace Assets.Scripts.Constants
 {
-	public class EnumList
-	{
-		public enum SeasonAreaType { One, Two, Three, Four, Five, MAX}
-		public enum FishType { Awrata, Vopa }
-	}
+	public enum SeasonAreaType { One, Two, Three, Four, Five, MAX}
+	public enum FishType { Awrata, Vopa }
 }

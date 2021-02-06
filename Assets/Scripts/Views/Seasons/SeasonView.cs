@@ -1,22 +1,27 @@
 ﻿using UnityEngine;
+using Assets.Scripts.Framework.Utils;
 
 namespace Assets.Scripts.Views.Seasons
 {
 	public class SeasonView : MonoBehaviour
 	{
+		public Transform FishTank { get; private set; }
 		private SpriteRenderer spriteRenderer;
+		// Padding
 
 		private void Awake()
 		{
 			spriteRenderer = transform.Find("SpriteSeason").GetComponent<SpriteRenderer>();
+			FishTank = new GameObject("FishTank").transform;
+			FishTank.SetParent(transform);
+			FishTank.ResetTransforms();
 		}
 
-		public void Set()
+		public void Set(Vector2 tankSize)
 		{
-			float height = Camera.main.orthographicSize * 2.0f;
-			float width = height * Screen.width / Screen.height;
+			
 			spriteRenderer.drawMode = SpriteDrawMode.Sliced;
-			spriteRenderer.size = new Vector2(width, height);
+			spriteRenderer.size = tankSize;
 		}
 
 		public Vector3 BoundSize() => spriteRenderer.bounds.size;
