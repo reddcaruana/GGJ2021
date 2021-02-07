@@ -29,7 +29,7 @@ namespace Assets.Scripts.Rods
 
 		public RodBase()
 		{
-			Net = new RodNet(5, new Vector3(0f, -ViewController.Area.Height / 2f));
+			Net = new RodNet(5);
 			Energy = new Energy(20, 0.1f);
 		}
 

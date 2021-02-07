@@ -8,6 +8,7 @@ using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.AquaticCreatures;
 using Assets.Scripts.AquaticCreatures.Fish;
+using Assets.Scripts.Paywalls;
 
 namespace Assets.Scripts.Seasons
 {
@@ -20,6 +21,7 @@ namespace Assets.Scripts.Seasons
 		public abstract int NumberOfSegments { get; }
 		public abstract FishData[] SupportedFish { get; }
 		public abstract int MaxFish { get; }
+		public abstract PaywallBase PayWall { get; }
 
 		private Vector3 baseWorldPosition;
 		public readonly Area2D FishTankArea;
@@ -45,12 +47,16 @@ namespace Assets.Scripts.Seasons
 				fishControllers[i] = new FishController();
 				fishControllers[i].RegisterToCoolDownComplete(OnFishCoolDown);
 			}
+
+			PayWall.Set(NiceName);
 		}
 
 		public void CreateView(Transform parent)
 		{
 			view = MonoBehaviour.Instantiate(AssetLoader.ME.Loader<SeasonView>("Prefabs/Seasons/SeasonView"), parent);
 			view.Set(FishTankArea.Size, NiceName, baseWorldPosition);
+			PayWall.CreateView(view.transform);
+
 		}
 
 		public Vector3 GetTopWorldPosition()

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Assets.Scripts.Paywalls;
 using Assets.Scripts.Constants;
 using Assets.Scripts.AquaticCreatures.Fish;
 
@@ -13,11 +14,16 @@ namespace Assets.Scripts.Seasons
 
 		public override FishData[] SupportedFish { get; } = new FishData[]
 		{
-			FishWiki.Awrata,
-			FishWiki.Vopa
+			FishWiki.F1,
+			FishWiki.F2,
+			FishWiki.F3,
+			FishWiki.F4,
+			FishWiki.F5
 		};
 
 		public override int MaxFish { get; } = 5;
+
+		public override PaywallBase PayWall { get; } = new SummerPaywall();
 
 		public Summer(Vector3 baseWorldPosition) : base(baseWorldPosition)
 		{

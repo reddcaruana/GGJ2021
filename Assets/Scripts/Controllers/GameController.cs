@@ -3,7 +3,6 @@ using Assets.Scripts.Rods;
 using UnityEngine.InputSystem;
 using Assets.Scripts.Framework;
 using Assets.Scripts.Framework.Tools;
-using Assets.Scripts.Player;
 
 namespace Assets.Scripts.Controllers
 {
@@ -14,6 +13,7 @@ namespace Assets.Scripts.Controllers
 
 		protected override void Awake()
 		{
+			PlayerPrefs.DeleteAll();
 			base.Awake();
 			GameFactory.Start();
 
@@ -23,7 +23,7 @@ namespace Assets.Scripts.Controllers
 		private void Start()
 		{
 			Rod = new BasicRod();
-			Rod.CreateView(ViewController.MainParent);
+			Rod.CreateView(ViewController.MainCamera.transform.Find("Boat"));
 			Rod.RegisterToOnCastComnplete(ViewController.CurrentSeason.OnCast);
 		}
 

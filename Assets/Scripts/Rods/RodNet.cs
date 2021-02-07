@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Framework.Utils;
+﻿using Assets.Scripts.Controllers;
+using Assets.Scripts.Framework.Utils;
 using UnityEngine;
 
 namespace Assets.Scripts.Rods
@@ -6,12 +7,11 @@ namespace Assets.Scripts.Rods
 	public class RodNet
 	{
 		public readonly float Radius;
-		public readonly Vector3 CenterWorldPos;
+		public Vector3 CenterWorldPos => new Vector3(0f, ViewController.MainCamera.transform.position.y - (ViewController.Area.Height / 2f));
 
-		public RodNet(float radius, Vector3 centerWorldPos)
+		public RodNet(float radius)
 		{
 			Radius = radius;
-			CenterWorldPos = centerWorldPos;
 		}
 
 		public bool IsIn(Vector2 worldPos) => MathUtils.IsInCircualarArea(CenterWorldPos, Radius, worldPos);

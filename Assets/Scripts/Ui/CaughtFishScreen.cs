@@ -7,6 +7,7 @@ using Assets.Scripts.Framework.Ui;
 using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.AquaticCreatures.Fish;
+using Assets.Scripts.Constants;
 
 namespace Assets.Scripts.Ui
 {
@@ -38,7 +39,7 @@ namespace Assets.Scripts.Ui
 
 		public void Show(FishTypeData data, Action onComplete = null)
 		{
-			fishImage.sprite = AssetLoader.ME.Loader<Sprite>("Sprites/Fish/Fish" + data.NiceName);
+			fishImage.sprite = FishWiki.GetSprite(data);
 			fishImage.rectTransform.DOScale(fishOriginalScale, 0.5f).SetEase(Ease.OutElastic).onComplete = () => 
 			{
 				bucketTransitionElement.Show(() => 

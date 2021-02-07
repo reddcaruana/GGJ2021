@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
+using Assets.Scripts.Utils;
 using System.Collections.Generic;
 using Assets.Scripts.AquaticCreatures.Fish;
-using Assets.Scripts.Utils;
 
 namespace Assets.Scripts.Player
 {
@@ -14,7 +14,7 @@ namespace Assets.Scripts.Player
 
 		public bool TryAdd(FishLogData data)
 		{
-			int index = IndexOf(data);
+			int index = IndexOf(data.Type);
 
 			if (index == -1)
 				log.Add(data);
@@ -29,16 +29,30 @@ namespace Assets.Scripts.Player
 			return true;
 		}
 
-		private int IndexOf(FishLogData data)
+		public int IndexOf(FishTypeData data)
 		{
 			for (int i = 0; i < log.Count; i++)
 			{
-				if (log[i].Type.Type == data.Type.Type)
+				if (log[i].Type.Type == data.Type)
 					return i;
 			}
 
 			return -1;
 		}
+
+		public bool TryGetData(FishTypeData data, out FishLogData result)
+		{
+			int index = IndexOf(data);
+			if (index == -1)
+			{
+				result = default;
+				return false;
+			}
+			result = log[index];
+			return true;
+		}
+
+		public FishLogData GetDataAt(int index) => log[index];
 
 		public void Save()
 		{

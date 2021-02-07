@@ -65,12 +65,12 @@ namespace Assets.Scripts.Views.Fish
 			isIdle = true;
 			IsManualOverride = false;
 
-			Face(endPos, duration / 2f);
-
 			spriteRenderer.transform.localPosition = startPos;
 			spriteRenderer.transform.DOLocalMoveY(endPos.y, duration)
-				.SetEase(Ease.InOutSine)
+				.SetEase(Ease.OutSine)
 				.OnComplete(() => onComplete?.Invoke());
+
+			Face(endPos, duration / 2f);
 
 			spriteRenderer.color = Statics.COLOR_ZERO;
 			spriteRenderer.DOColor(SOLID_COLOR, duration)

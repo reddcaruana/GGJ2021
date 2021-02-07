@@ -12,6 +12,7 @@ namespace Assets.Scripts.Framework
         public static readonly Vector2 VECTOR2_ONE = new Vector2(1, 1);
 
         public static readonly Color COLOR_WHITE = Color.white;
+        public static readonly Color COLOR_GRAY = Color.gray;
         public static readonly Color COLOR_BLACK = Color.black;
         public static readonly Color COLOR_ZERO = new Color(0f, 0f, 0f, 0f);
     }
