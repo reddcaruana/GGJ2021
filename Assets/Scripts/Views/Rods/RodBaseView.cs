@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
 
 namespace Assets.Scripts.Views.Rods
@@ -17,6 +18,11 @@ namespace Assets.Scripts.Views.Rods
 
 			spriteRenderer = transform.Find("SpriteRod").GetComponent<SpriteRenderer>();
 			spriteRenderer.transform.SetParent(pivotTransform);
+		}
+
+		public void Set(string typeStr)
+		{
+			spriteRenderer.sprite = AssetLoader.ME.Loader<Sprite>($"Sprites/Rods/Rod{typeStr}");
 
 			Vector3 localPos = new Vector3();
 			localPos.y += spriteRenderer.bounds.size.y / 2f;
@@ -30,5 +36,6 @@ namespace Assets.Scripts.Views.Rods
 			currentRotation.z = angle;
 			pivotTransform.localRotation = Quaternion.Euler(currentRotation);
 		}
+
 	}
 }

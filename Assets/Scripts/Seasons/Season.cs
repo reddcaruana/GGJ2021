@@ -1,41 +1,64 @@
 ﻿using UnityEngine;
+using Assets.Scripts.Utils;
 using Assets.Scripts.Constants;
 using Assets.Scripts.Framework;
+using System.Collections.Generic;
 using Assets.Scripts.Controllers;
 using Assets.Scripts.Views.Seasons;
 using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.AquaticCreatures.Fish;
+using Assets.Scripts.AquaticCreatures;
 
 namespace Assets.Scripts.Seasons
 {
 	public abstract class Season
 	{
+		private const float MARGIN_NORMALISED = 0.2f;
+
 		public abstract SeasonAreaType Type { get; }
+		public abstract string NiceName { get; }
 		public abstract int NumberOfSegments { get; }
 		public abstract FishData[] SupportedFish { get; }
 		public abstract int MaxFish { get; }
 
-		protected static FishController[] fishControllers;
-		private readonly Vector2 FishTankSize;
+		private Vector3 baseWorldPosition;
+		public readonly Area2D FishTankArea;
+		protected FishController[] fishControllers;
 
 
 		public bool HasView => view != null;
 		protected SeasonView view;
 
-		public Season()
+		public Season(Vector3 baseWorldPosition)
 		{
-			FishTankSize = new Vector2(ViewController.Width, ViewController.Height * NumberOfSegments);
+			this.baseWorldPosition = baseWorldPosition;
+
+			float x = ViewController.Area.Width - (ViewController.Area.Width * MARGIN_NORMALISED);
+			float y = ViewController.Area.Height * NumberOfSegments;
+			Vector2 center = baseWorldPosition;
+			center.y += y / 2f;
+			FishTankArea = new Area2D(x, y, center);
 
 			fishControllers = new FishController[MaxFish];
 			for (int i = 0; i < fishControllers.Length; i++)
+			{
 				fishControllers[i] = new FishController();
+				fishControllers[i].RegisterToCoolDownComplete(OnFishCoolDown);
+			}
 		}
 
 		public void CreateView(Transform parent)
 		{
 			view = MonoBehaviour.Instantiate(AssetLoader.ME.Loader<SeasonView>("Prefabs/Seasons/SeasonView"), parent);
-			view.Set(FishTankSize);
+			view.Set(FishTankArea.Size, NiceName, baseWorldPosition);
+		}
+
+		public Vector3 GetTopWorldPosition()
+		{
+			Vector3 result = view.transform.position;
+			result.y += (FishTankArea.Height / 2f);
+			return result;
 		}
 
 		public void CreateFishViews()
@@ -60,11 +83,11 @@ namespace Assets.Scripts.Seasons
 
 		public void DistriubuteFish()
 		{
-			float verticalStep = FishTankSize.y / MaxFish;
+			float verticalStep = FishTankArea.Height / MaxFish;
 			Vector3 localPosition = new Vector3()
 			{
 				x = 0,
-				y = (FishTankSize.y / 2f) - (verticalStep / 2f)
+				y = (FishTankArea.Height / 2f) - (verticalStep / 2f)
 			};
 
 			for (int i = 0; i < fishControllers.Length; i++)
@@ -78,6 +101,7 @@ namespace Assets.Scripts.Seasons
 		public void OnFishCoolDown(FishController fishController)
 		{
 			SetFish(fishController);
+			fishController.Appear();
 		}
 
 		public bool ValidatePosition(Vector2 screenPosition, out Vector3 worldPos)
@@ -90,27 +114,51 @@ namespace Assets.Scripts.Seasons
 			}
 
 			worldPos = ViewController.MainCamera.ScreenToWorldPoint(screenPosition);
-			Vector3 topLftCorner = view.transform.position;
-			topLftCorner.x -= FishTankSize.x / 2f;
-			topLftCorner.y += FishTankSize.y / 2;
-
-			Vector3 bottomRightCorner = topLftCorner;
-			bottomRightCorner.x += FishTankSize.x;
-			bottomRightCorner.y -= FishTankSize.y;
-
-			return MathUtils.IsInRectArea(topLftCorner, bottomRightCorner, worldPos);
+			return MathUtils.IsInRectArea(FishTankArea, worldPos);
 		}
 
-		public void OnCast(Vector3 wordlPosition)
+		public IAquaticCreature OnCast(Vector3 worldPosition)
 		{
+
 			Vector3 localPosition;
 			if (HasView)
-				localPosition = view.transform.InverseTransformPoint(wordlPosition);
+				localPosition = view.transform.InverseTransformPoint(worldPosition);
 			else
-				localPosition = wordlPosition;
+				localPosition = worldPosition;
+
+			List<IAquaticCreature> potentialCatch = new List<IAquaticCreature>();
 
 			for (int i = 0; i < fishControllers.Length; i++)
-				fishControllers[i].OnCast(localPosition);
+			{
+				if (!fishControllers[i].CanCatch)
+					continue;
+
+				IAquaticCreature creature = fishControllers[i].OnCast(localPosition);
+				if (creature != null)
+					potentialCatch.Add(creature);
+			}
+
+			IAquaticCreature approachFloat = null;
+
+			for (int i = 0; i < potentialCatch.Count; i++)
+			{
+				if (approachFloat == null)
+				{
+					approachFloat = potentialCatch[i];
+					continue;
+				}
+
+				if (approachFloat.Weight < potentialCatch[i].Weight)
+				{
+					approachFloat.Escape();
+					approachFloat = potentialCatch[i];
+				}
+			}
+
+			if (approachFloat != null)
+				approachFloat.ApproachFloat(localPosition);
+
+			return approachFloat;
 		}
 	}
 }

@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using Assets.Scripts.Rods;
-using Assets.Scripts.Seasons;
 using UnityEngine.InputSystem;
 using Assets.Scripts.Framework;
 using Assets.Scripts.Framework.Tools;
@@ -11,30 +10,30 @@ namespace Assets.Scripts.Controllers
 	{
 		Vector2 mousePos;
 
-		public Season CurrentSeason { get; private set; }
-		private RodBase rod;
-		private Transform TestParent;
+		public RodBase Rod { get; private set; }
+
+		//[SerializeField] Transform obj;
+		//AccelerationModule a;
+		//float angle = 0;
 
 		protected override void Awake()
 		{
 			base.Awake();
-			TestParent = new GameObject("MainParent").transform;
 			GameFactory.Start();
+
+			ViewController.Init();
+
+			//void TestSet(Vector3 pos) => obj.transform.position = pos;
+			//Vector3 TestGet() => obj.transform.position;
+			//a = new AccelerationModule(TestSet, TestGet);
+
 		}
 
 		private void Start()
 		{
-			Season seasons = new Summer();
-			seasons.CreateView(TestParent);
-			seasons.CreateFishViews();
-			seasons.SetAllFish();
-			seasons.DistriubuteFish();
-
-			CurrentSeason = seasons;
-
-			rod = new BasicRod();
-			rod.CreateView(TestParent);
-			rod.RegisterToOnCastComnplete(CurrentSeason.OnCast);
+			Rod = new BasicRod();
+			Rod.CreateView(ViewController.MainParent);
+			Rod.RegisterToOnCastComnplete(ViewController.CurrentSeason.OnCast);
 		}
 
 		private void OnPosition(InputValue inputValue)
@@ -45,7 +44,32 @@ namespace Assets.Scripts.Controllers
 
 		private void OnClick()
 		{
-			rod.TryCast(mousePos);
+			Rod.ReelIn();
+			Rod.TryCast(mousePos);
+		}
+
+		private void OnUp()
+		{
+			//a.SetSpeed(0.05f);
+		}
+
+		private void OnDown()
+		{
+			//a.SetSpeed(-0.05f);
+		}
+
+		private void OnRight()
+		{
+			//angle++;
+			//obj.transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
+			//a.SetDirection(angle);
+		}
+
+		private void OnLeft()
+		{
+			//angle--;
+			//obj.transform.rotation = Quaternion.Euler(new Vector3(0, 0, angle));
+			//a.SetDirection(angle);
 		}
 	}
 }

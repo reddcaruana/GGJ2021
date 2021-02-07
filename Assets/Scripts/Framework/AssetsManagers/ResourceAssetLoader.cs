@@ -6,7 +6,12 @@ namespace Assets.Scripts.AssetsManagers
 	{
 		public override T Loader<T>(string path) 
 		{
-			return Resources.Load<T>(path);
+			T t = Resources.Load<T>(path);
+
+			if (t == null)
+				Debug.LogError("[AssetLoader] Unable to Find: " + path);
+
+			return t;
 		}
 	}
 }

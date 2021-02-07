@@ -1,9 +1,11 @@
 ﻿using System;
 using UnityEngine;
+using Assets.Scripts.Utils;
 using Assets.Scripts.Constants;
 using Assets.Scripts.Views.Fish;
 using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
+using Assets.Scripts.Framework;
 
 namespace Assets.Scripts.AquaticCreatures.Fish
 {
@@ -11,6 +13,7 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 	{
 		private const float COOL_DOWN = 6f;
 
+		private FightingModule fightingModule;
 		private Action<FishController> onCoolDownComplete;
 		private float proximityFear;
 		private float proximityBite;
@@ -27,8 +30,8 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			if (HasView)
 			{
 				view.Set(this);
-				view.CreateDebugAreaView(proximityFear, Color.yellow, "Fear");
-				view.CreateDebugAreaView(proximityBite, Color.green, "Bite");
+				view.SetStartAndEnd(proximityFear, proximityBite);
+				DebugAreaView();
 			}
 		}
 
@@ -41,54 +44,10 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		public void UnregiisterFromCoolDownComplete(Action<FishController> callback) =>
 			onCoolDownComplete -= callback;
 
+		public override Vector3 GetLocalSpawnPosition() => spawnLocalPosition;
+
 		public bool InFearProximity(Vector2 localPosition) => InProximity(proximityFear / 2f, localPosition);
 		public bool InBiteProximity(Vector2 localPosition) => InProximity(proximityBite / 2f, localPosition);
-
-		public override void OnCast(Vector3 localPosition)
-		{
-			if (InFearProximity(localPosition))
-				Escape();
-			else if (InBiteProximity(localPosition))
-				ApproachFloat(localPosition);
-		}
-
-		protected override void AppearInternal()
-		{
-			if (HasView)
-				view.Appear();
-		}
-
-		private void Escape()
-		{
-			Debug.Log("[FishController] Escape");
-
-			if (HasView)
-				view.Escape(null);
-
-			CoolDown();
-		}
-
-		private void ApproachFloat(Vector2 floatLocalPosition)
-		{
-			Debug.Log("[FishController] Approach");
-			isAvailable = false;
-
-			if (HasView)
-				view.ApprochFloat(floatLocalPosition);
-		}
-
-		private void CoolDown()
-		{
-			CoroutineRunner.Wait(COOL_DOWN, OnCoolDownComplete);
-
-			void OnCoolDownComplete()
-			{
-				IsReadyToSet = true;
-				onCoolDownComplete?.Invoke(this);
-			}
-		}
-
-		public override Vector3 GetPosition() => spawnLocalPosition;
 
 		public void SetSpawnPoint(Vector3 localPosition)
 		{
@@ -100,7 +59,7 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 
 		private static float CalculateProximityFear(float size)
 		{
-			const float MinFear = 4f;
+			const float MinFear = 2f;
 			return CalculateProximity(size, MinFear, FishWiki.PROXIMITY_FEAR);
 		}
 
@@ -114,6 +73,98 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		{
 			float result = size + (size * range);
 			return result < min ? min : result;
+		}
+
+		public override IAquaticCreature OnCast(Vector3 localPosition)
+		{
+			if (InFearProximity(localPosition))
+				Escape();
+
+			else if (InBiteProximity(localPosition))
+				return this;
+
+			return null;
+		}
+
+		protected override void AppearInternal()
+		{
+			if (HasView)
+				view.Appear();
+		}
+
+		protected override void EscapeInternal()
+		{
+			if (HasView)
+			{
+				view.Escape(null);
+				CleanDebugAreaView();
+			}
+
+			CoolDown();
+		}
+
+		private void CoolDown()
+		{
+			CoroutineRunner.Wait(COOL_DOWN, OnCoolDownComplete);
+
+			void OnCoolDownComplete()
+			{
+				IsReadyToSet = true;
+				onCoolDownComplete?.Invoke(this);
+			}
+		}
+
+		public override void ApproachFloatInternal(Vector2 floatLocalPosition)
+		{
+			if (HasView)
+				view.ApprochFloat(floatLocalPosition);
+		}
+
+		public override void Fight()
+		{
+			if (HasView)
+				view.SetManualOverride(true);
+			fightingModule = new FightingModule(this);
+		}
+
+		public void ManualSwim(Vector3 newWorldPos)
+		{
+			if (HasView)
+				view.ManualOverride(newWorldPos);
+		}
+
+		public override void ReelIn(float speed)
+		{
+			if (fightingModule == null)
+				return;
+
+			fightingModule.ReelIn(speed);
+		}
+
+		public Vector3 GetViewWorldPosition() => HasView ? view.GetFishWorldPosition() : Statics.VECTOR3_ZERO;
+
+		[System.Diagnostics.Conditional("RDEBUG")]
+		private void DebugAreaView()
+		{
+			if (!HasView)
+				return;
+
+			Color color = Color.yellow;
+			color.a = 0.4f;
+			DebugUtils.CreateDebugAreaView(proximityFear, color, "Fear", -1, view.transform);
+			color = Color.green;
+			color.a = 0.4f;
+			DebugUtils.CreateDebugAreaView(proximityBite, color, "Bite", -2, view.transform);
+		}
+
+		[System.Diagnostics.Conditional("RDEBUG")]
+		private void CleanDebugAreaView()
+		{
+			if (!HasView)
+				return;
+
+			MonoBehaviour.Destroy(view.transform.Find("Fear").gameObject);
+			MonoBehaviour.Destroy(view.transform.Find("Bite").gameObject);
 		}
 	}
 }
