@@ -12,13 +12,15 @@ namespace Assets.Scripts.Constants
 		public static readonly FishData Awrata = new FishData(
 			type: new FishTypeData(FishType.Awrata, "Awrata"),
 			minWeight: 1f,
-			maxWeight: 5f
+			maxWeight: 5f,
+			baseEnergy: 10f
 		);
 
 		public static readonly FishData Vopa = new FishData(
 			type: new FishTypeData(FishType.Vopa, "Vopa"),
 			minWeight: 0.5f,
-			maxWeight: 1f
+			maxWeight: 1f,
+			baseEnergy: 5f
 		);
 
 		public static FishData GetOneRandom(FishData[] data) =>

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.Framework.Utils;
+using UnityEngine;
 
 namespace Assets.Scripts.Rods
 {
@@ -12,5 +13,7 @@ namespace Assets.Scripts.Rods
 			Radius = radius;
 			CenterWorldPos = centerWorldPos;
 		}
+
+		public bool IsIn(Vector2 worldPos) => MathUtils.IsInCircualarArea(CenterWorldPos, Radius, worldPos);
 	}
 }

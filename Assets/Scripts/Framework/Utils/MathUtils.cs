@@ -95,6 +95,17 @@ namespace Assets.Scripts.Framework.Utils
 			return CalculateAngleFromGivenCoordinates(distanceOnAxis[0], distanceOnAxis[1]);
 		}
 
+		/// <summary>
+		/// Returns the value of the other axis scale in order to preserve volume.
+		/// </summary>
+		/// <param name="stretchedOrSquashedScale"></param>
+		/// <returns></returns>
+		public static float VolumePreservation(float stretchedOrSquashedScale, float defaultScale = 1)
+		{
+			stretchedOrSquashedScale -= defaultScale - 1;
+			return stretchedOrSquashedScale == 0 ? 0 : 1f / Mathf.Sqrt(stretchedOrSquashedScale) * defaultScale;
+		}
+
 		public static int ClampIndex(int currentIndex, int lenght)
 		{
 			if (currentIndex < 0)

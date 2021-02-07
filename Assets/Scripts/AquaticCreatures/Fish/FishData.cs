@@ -8,16 +8,21 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		public readonly FishTypeData Type;
 		public readonly float MinWeight;
 		public readonly float MaxWeight;
+		public readonly float BaseEnergy;
 
-		public FishData(FishTypeData type, float minWeight, float maxWeight)
+		public FishData(FishTypeData type, float minWeight, float maxWeight, float baseEnergy)
 		{
 			Type = type;
 			MinWeight = minWeight;
 			MaxWeight = maxWeight;
+			BaseEnergy = baseEnergy;
 		}
 
 		public float GetRandomWeight() =>
 			Random.Range(MinWeight, MaxWeight);
+
+		public float IdealWeight() =>
+			MinWeight + ((MaxWeight - MinWeight) / 2f);
 	}
 
 	public readonly struct FishTypeData

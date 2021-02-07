@@ -52,6 +52,14 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
+                },
+                {
+                    "name": "LeftRightUp",
+                    "type": "Value",
+                    "id": "c1a1dbc4-4761-41a0-a5b3-8d774240a8f4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": ""
                 }
             ],
             "bindings": [
@@ -103,7 +111,7 @@
                     "name": "",
                     "id": "a0f545a0-f27d-479e-b2d5-f41a21232d28",
                     "path": "<Keyboard>/#(A)",
-                    "interactions": "",
+                    "interactions": "Hold",
                     "processors": "",
                     "groups": "",
                     "action": "Left",
@@ -114,10 +122,32 @@
                     "name": "",
                     "id": "a1c9f080-3b9f-4725-98d0-382f30f5952d",
                     "path": "<Keyboard>/#(D)",
-                    "interactions": "",
+                    "interactions": "Hold",
                     "processors": "",
                     "groups": "",
                     "action": "Right",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "67d92d8f-ac0f-4c0d-bf13-1dd40a78d1fb",
+                    "path": "<Keyboard>/#(A)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftRightUp",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e91bf5c1-62e4-4f66-b20c-48f4082b9d23",
+                    "path": "<Keyboard>/#(D)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftRightUp",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

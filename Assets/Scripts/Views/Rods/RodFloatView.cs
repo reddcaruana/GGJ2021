@@ -59,6 +59,9 @@ namespace Assets.Scripts.Views.Rods
 
 		public void Reset(Vector3 targetWorldPosition, float duration, Action onComplete = null)
 		{
+			Rise(0);
+			spriteRenderer.DOColor(Statics.COLOR_WHITE, duration * 0.2f);
+
 			transform.DOScale(StartScale, duration).SetEase(Ease.InOutSine);
 			transform.DOMove(targetWorldPosition, duration).SetEase(Ease.InOutSine).onComplete = () => onComplete?.Invoke();
 		}

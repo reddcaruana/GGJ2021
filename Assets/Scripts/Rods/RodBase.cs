@@ -1,37 +1,45 @@
 ﻿using System;
 using UnityEngine;
 using Assets.Scripts.Utils;
+using Assets.Scripts.Generic;
+using Assets.Scripts.Constants;
 using Assets.Scripts.Views.Rods;
 using Assets.Scripts.Controllers;
 using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.AquaticCreatures;
+using Assets.Scripts.AquaticCreatures.Fish;
+using Assets.Scripts.Player;
 
 namespace Assets.Scripts.Rods
 {
 	public abstract class RodBase
 	{
 		public abstract string NiceName { get; }
-		private readonly RodFloat rodFloat = new RodFloat();
-		private readonly RodNet rodNet;
+		private readonly RodFloat RodFloat = new RodFloat();
+		public readonly RodNet Net;
+		public readonly Energy Energy;
 
 		private Func<Vector3, IAquaticCreature> onCastComplete;
 
-		public bool HasVeiw => view == null;
+		public bool HasVeiw => view != null;
 		private RodBaseView view;
+
 		private IAquaticCreature potentialCatch;
+		public PullState PullState = PullState.None;
 
 		public RodBase()
 		{
-			rodNet = new RodNet(5, new Vector3(0f, -ViewController.Area.Height / 2f));
+			Net = new RodNet(5, new Vector3(0f, -ViewController.Area.Height / 2f));
+			Energy = new Energy(20, 0.1f);
 		}
 
 		public void CreateView(Transform parent)
 		{
 			view = MonoBehaviour.Instantiate(AssetLoader.ME.Loader<RodBaseView>("Prefabs/Rods/RodBaseView"), parent);
 			view.Set(NiceName);
-			view.SetPosition(rodNet.CenterWorldPos);
-			rodFloat.CreateView(view.transform);
-			DebugUtils.CreateDebugAreaView(rodNet.Radius, Color.red, "Net", -5, view.transform);
+			view.SetPosition(Net.CenterWorldPos);
+			RodFloat.CreateView(view.transform);
+			DebugUtils.CreateDebugAreaView(Net.Radius, Color.red, "Net", -5, view.transform);
 		}
 
 		public void RegisterToOnCastComnplete(Func<Vector3, IAquaticCreature> callback) =>
@@ -42,7 +50,7 @@ namespace Assets.Scripts.Rods
 
 		public bool TryCast(Vector3 screenPosition)
 		{
-			if (rodFloat.IsCasted)
+			if (RodFloat.IsCasted)
 				return false;
 			return Cast(screenPosition);
 		}
@@ -52,7 +60,7 @@ namespace Assets.Scripts.Rods
 			if (!ViewController.CurrentSeason.ValidatePosition(screenPosition, out Vector3 worldPos))
 				return false;
 
-			rodFloat.Cast(worldPos, 0.5f, OnCastCompolete);
+			RodFloat.Cast(worldPos, 0.5f, OnCastCompolete);
 			
 			void OnCastCompolete() => 
 				CheckForPotentialCatch(onCastComplete?.Invoke(worldPos));
@@ -66,32 +74,31 @@ namespace Assets.Scripts.Rods
 				return;
 
 			potentialCatch = creature;
-			rodFloat.Nibble(6f, CatchWindow);
+			RodFloat.Nibble(6f, CatchWindow);
 		}
 
 		void CatchWindow()
 		{
-			rodFloat.CatchWindow(2f);
+			RodFloat.CatchWindow(2f);
 		}
 
 		public void ReelIn()
 		{
-			if (!rodFloat.IsCasted)
+			if (!RodFloat.IsCasted)
 				return;
 
 			// Fish Escapes if you reel in while Nibbling
-			if (rodFloat.IsNibbling)
+			if (RodFloat.IsNibbling)
 			{
 				potentialCatch.Escape();
-				rodFloat.StopNibble();
-				rodFloat.Reset();
+				RodFloat.StopNibble();
+				RodFloat.Reset();
 				potentialCatch = null;
 			}
 			// Fish is Caught
-			else if (rodFloat.CanCatch)
+			else if (RodFloat.CanCatch)
 			{
-				Debug.Log($"!!! Caught {potentialCatch.Data.Type.NiceName} !!!");
-				rodFloat.Hooked();
+				RodFloat.Hooked();
 				potentialCatch.Fight();
 			}
 			// Pull Catch
@@ -102,7 +109,42 @@ namespace Assets.Scripts.Rods
 			//Reel in float
 			else
 			{
-				rodFloat.Reset();
+				RodFloat.Reset();
+			}
+		}
+
+		public void FishEscaped()
+		{
+			RodFloat.Reset();
+		}
+
+		public void CaughtFish(FishLogData fishLogData)
+		{
+			PlayerData.LogBook.TryAdd(fishLogData);
+			ViewController.UiController.CaughtFish(fishLogData.Type, onComplete: RodFloat.Reset);
+		}
+
+		public void PullLeft() => Pull(PullState.Left);
+
+		public void PullRight() => Pull(PullState.Right);
+
+		public void NoPull() => Pull(PullState.None);
+
+		private void Pull(PullState state)
+		{
+			PullState = state;
+
+			if (HasVeiw)
+			{
+				float angle;
+				switch (state)
+				{
+					case PullState.Left: angle = 45; break;
+					case PullState.None: angle = 0; break;
+					case PullState.Right: angle = -45; break;
+					default: angle = 0; break;
+				}
+				view.Rotate(angle, 0.1f, flip: state == PullState.Right);
 			}
 		}
 	}

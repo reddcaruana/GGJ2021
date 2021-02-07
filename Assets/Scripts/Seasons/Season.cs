@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using Assets.Scripts.Utils;
 using Assets.Scripts.Constants;
 using Assets.Scripts.Framework;
 using System.Collections.Generic;
@@ -7,8 +6,8 @@ using Assets.Scripts.Controllers;
 using Assets.Scripts.Views.Seasons;
 using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
-using Assets.Scripts.AquaticCreatures.Fish;
 using Assets.Scripts.AquaticCreatures;
+using Assets.Scripts.AquaticCreatures.Fish;
 
 namespace Assets.Scripts.Seasons
 {
@@ -119,7 +118,6 @@ namespace Assets.Scripts.Seasons
 
 		public IAquaticCreature OnCast(Vector3 worldPosition)
 		{
-
 			Vector3 localPosition;
 			if (HasView)
 				localPosition = view.transform.InverseTransformPoint(worldPosition);

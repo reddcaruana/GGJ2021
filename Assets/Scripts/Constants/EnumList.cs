@@ -2,4 +2,5 @@
 {
 	public enum SeasonAreaType { One, Two, Three, Four, Five, MAX}
 	public enum FishType { Awrata, Vopa }
+	public enum PullState { None, Left, Right }
 }

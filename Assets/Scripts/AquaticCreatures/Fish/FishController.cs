@@ -2,10 +2,11 @@
 using UnityEngine;
 using Assets.Scripts.Utils;
 using Assets.Scripts.Constants;
+using Assets.Scripts.Framework;
 using Assets.Scripts.Views.Fish;
+using Assets.Scripts.Controllers;
 using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
-using Assets.Scripts.Framework;
 
 namespace Assets.Scripts.AquaticCreatures.Fish
 {
@@ -95,12 +96,9 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		protected override void EscapeInternal()
 		{
 			if (HasView)
-			{
 				view.Escape(null);
-				CleanDebugAreaView();
-			}
 
-			CoolDown();
+			Reset();
 		}
 
 		private void CoolDown()
@@ -114,6 +112,25 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			}
 		}
 
+		protected override void CaughtInternal()
+		{
+			if (HasView)
+				view.Caught();
+
+			Reset();
+		}
+
+		private void Reset()
+		{
+			if (HasView)
+				CleanDebugAreaView();
+
+			if (fightingModule != null)
+				fightingModule = null;
+
+			CoolDown();
+		}
+
 		public override void ApproachFloatInternal(Vector2 floatLocalPosition)
 		{
 			if (HasView)
@@ -124,7 +141,7 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		{
 			if (HasView)
 				view.SetManualOverride(true);
-			fightingModule = new FightingModule(this);
+			fightingModule = new FightingModule(this, GameController.ME.Rod);
 		}
 
 		public void ManualSwim(Vector3 newWorldPos)

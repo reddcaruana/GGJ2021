@@ -18,5 +18,6 @@ namespace Assets.Scripts.AquaticCreatures
 		void ApproachFloat(Vector2 floatLocalPosition);
 		void Fight();
 		void ReelIn(float speed);
+		FishLogData Caught();
 	}
 }

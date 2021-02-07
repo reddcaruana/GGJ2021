@@ -11,9 +11,10 @@ namespace Assets.Scripts.Controllers
 		public static Camera MainCamera = Camera.main;
 		public static readonly Area2D Area;
 
+		public static readonly UiController UiController = new UiController();
+
 		public static Transform MainParent;
 		public static Season CurrentSeason { get; private set; }
-
 		private static Season[] seasons = new Season[(int)SeasonAreaType.MAX];
 
 		static ViewController()
@@ -30,6 +31,8 @@ namespace Assets.Scripts.Controllers
 
 			// Temporary Create Summer
 			CurrentSeason = seasons[0] = SeasonFactory.CreateSeason(MainParent, SeasonAreaType.One, GetNewSeasonWorldPosition(0));
+
+			UiController.Init();
 		}
 
 		public static void CreateSeasons()

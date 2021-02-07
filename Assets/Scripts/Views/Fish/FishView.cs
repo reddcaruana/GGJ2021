@@ -121,6 +121,11 @@ namespace Assets.Scripts.Views.Fish
 				.OnComplete(() => onComplete?.Invoke());
 		}
 
+		public void Caught()
+		{
+			spriteRenderer.color = Statics.COLOR_ZERO;
+		}
+
 		private void Face(Vector2 localPosition, float duration, Action onComplete = null)
 		{
 			Vector3 rotation = new Vector3();

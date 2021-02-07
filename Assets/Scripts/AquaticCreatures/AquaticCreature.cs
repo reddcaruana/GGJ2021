@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
-using Assets.Scripts.Framework;
+using Assets.Scripts.Generic;
 using Assets.Scripts.Constants;
 using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.AquaticCreatures.Fish;
+using Assets.Scripts.Controllers;
 
 namespace Assets.Scripts.AquaticCreatures
 {
@@ -12,6 +13,8 @@ namespace Assets.Scripts.AquaticCreatures
 		public FishData Data { get; private set; }
 		public float Weight { get; private set; }
 		public float Size { get; private set; }
+		public Energy Energy { get; private set; }
+
 		public bool IsReadyToSet { get; protected set; } = true;
 		protected bool isAvailable;
 		public bool CanCatch => !IsReadyToSet && isAvailable;
@@ -21,6 +24,7 @@ namespace Assets.Scripts.AquaticCreatures
 			Data = data;
 			Weight = Data.GetRandomWeight();
 			Size = Weight * FishWiki.SIZE_PER_WEIGHT_RATIO;
+			Energy = new Energy((Weight / Data.IdealWeight()) * Data.BaseEnergy, 0.1f);
 
 			SetInternal();
 
@@ -62,5 +66,14 @@ namespace Assets.Scripts.AquaticCreatures
 		public abstract void Fight();
 
 		public abstract void ReelIn(float speed);
+
+		public FishLogData Caught()
+		{
+			FishLogData data = new FishLogData(this, ViewController.CurrentSeason);
+			CaughtInternal();
+			return data;
+		}
+
+		protected abstract void CaughtInternal();
 	}
 }

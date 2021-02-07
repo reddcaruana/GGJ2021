@@ -9,7 +9,7 @@ namespace Assets.Scripts.Framework.Tools
 	{
 		private Action<Vector3> moveUpdate;
 		private Func<Vector3> getWorldPosition;
-		private Func<Vector3, bool> checkPosition;
+		private Func<Vector3, Vector3> checkPosition;
 
 		public bool IsActive { get; set; } = true;
 		public bool HasBounds => checkPosition != null;
@@ -28,10 +28,8 @@ namespace Assets.Scripts.Framework.Tools
 			coroutine = CoroutineRunner.RunCoroutine(UpdateCoroutine());
 		}
 
-		public void SetBounds(Func<Vector3, bool> checkPosition)
-		{
+		public void SetBounds(Func<Vector3, Vector3> checkPosition) =>
 			this.checkPosition = checkPosition;
-		}
 
 		public void SetDirection(float angle)
 		{
@@ -58,8 +56,10 @@ namespace Assets.Scripts.Framework.Tools
 				Vector2 pos = getWorldPosition();
 				pos += speedVector;
 
-				if (!HasBounds || (HasBounds && checkPosition(pos)))
-					moveUpdate(pos);
+				if (HasBounds)
+					pos = checkPosition(pos);
+
+				moveUpdate(pos);
 
 				speed = 0;
 				yield return null;
