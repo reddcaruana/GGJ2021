@@ -9,7 +9,7 @@ namespace Assets.Scripts.Framework.Utils
 	/// This is a Coroutine Utility where it allows you to run coroutines when a Monobehavior is not available,
 	/// or you want the coroutine to live while switching scenes.
 	/// </summary>
-	public class CoroutineRunner : MonobehaviourSingleton<CoroutineRunner>
+	public class CoroutineRunner : RDMonobehaviourSingleton<CoroutineRunner>
 	{
 
 		protected override void Awake()

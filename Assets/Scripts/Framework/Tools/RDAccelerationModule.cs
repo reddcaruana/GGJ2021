@@ -5,7 +5,7 @@ using Assets.Scripts.Framework.Utils;
 
 namespace Assets.Scripts.Framework.Tools
 {
-	public class AccelerationModule
+	public class RDAccelerationModule
 	{
 		private Action<Vector3> moveUpdate;
 		private Func<Vector3> getWorldPosition;
@@ -21,7 +21,7 @@ namespace Assets.Scripts.Framework.Tools
 
 		private Coroutine coroutine;
 
-		public AccelerationModule(Action<Vector3> moveUpdate, Func<Vector3> getWorldPosition)
+		public RDAccelerationModule(Action<Vector3> moveUpdate, Func<Vector3> getWorldPosition)
 		{
 			this.moveUpdate = moveUpdate;
 			this.getWorldPosition = getWorldPosition;

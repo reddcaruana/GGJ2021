@@ -2,7 +2,7 @@
 
 namespace Assets.Scripts.Framework.Ui
 {
-	public class RUiObject : MonoBehaviour
+	public class RDUiObject : MonoBehaviour
 	{
         private RectTransform rectTransformRef;
 

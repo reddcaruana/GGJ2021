@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Framework.Ui
 {
-	public class UiTransitionAttachment
+	public class RDUiTransitionAttachment
 	{
 		public enum State { Hidden, HideTransition, ShowTransition, Visible }
 

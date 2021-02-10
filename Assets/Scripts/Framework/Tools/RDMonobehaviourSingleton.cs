@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Framework.Tools
 {
-	public class MonobehaviourSingleton<T> : MonoBehaviour
+	public class RDMonobehaviourSingleton<T> : MonoBehaviour
         where T : Component
 	{
         private static bool quit;

@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace Assets.Scripts.Framework.Ui
 {
-	public class UiTransitionElement : RUiObject
+	public class RDUiTransitionElement : RDUiObject
 	{
-		private UiTransitionAttachment uiTransition = new UiTransitionAttachment();
+		private RDUiTransitionAttachment uiTransition = new RDUiTransitionAttachment();
 		public bool IsMovable { get => uiTransition.isMovable; set => uiTransition.isMovable = value; }
 		public float HideTime { get => uiTransition.hideTime; set => uiTransition.hideTime = value; }
 		public float ShowTime { get => uiTransition.showTime; set => uiTransition.showTime = value; }
@@ -13,7 +13,7 @@ namespace Assets.Scripts.Framework.Ui
 		public Vector2 ShowPos { get => uiTransition.showPos; set => uiTransition.showPos = value; }
 		public Vector2 HidePos { get => uiTransition.hidePos; set => uiTransition.hidePos = value; }
 
-		public void InitTransitions(UiTransitionAttachment.State state, bool autoGrabMissingPosFromAwake = true) => 
+		public void InitTransitions(RDUiTransitionAttachment.State state, bool autoGrabMissingPosFromAwake = true) => 
 			uiTransition.Init(rectTransform, state, autoGrabMissingPosFromAwake);
 
 		public virtual void Show(Action onComplete = null) => uiTransition.Show(onComplete);

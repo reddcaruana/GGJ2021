@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace Assets.Scripts.Framework.Ui
 {
-	public class UiTransitionButtonAttachemnt<T> : UiTransitionAttachment
+	public class RDUiTransitionButtonAttachemnt<T> : RDUiTransitionAttachment
 		where T : Button
 	{
 		public T button;

@@ -6,7 +6,7 @@ using Assets.Scripts.Framework.Utils;
 namespace Assets.Scripts.Framework.Tools
 {
 	public enum AnimationState { Play, Pause, Stop}
-	public class RAnimator
+	public class RDAnimator
 	{
 		public float FPS { get; set; }
 		public bool IsLoop { get; set; }
@@ -16,7 +16,7 @@ namespace Assets.Scripts.Framework.Tools
 		private int frames;
 		private int currentFrame = 0;
 
-		public RAnimator(int frames, Action<int> onFrameUpdate)
+		public RDAnimator(int frames, Action<int> onFrameUpdate)
 		{
 			this.frames = frames;
 			this.onFrameUpdate = onFrameUpdate;
