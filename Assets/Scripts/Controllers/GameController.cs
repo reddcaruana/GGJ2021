@@ -1,22 +1,26 @@
 ﻿using UnityEngine;
 using Assets.Scripts.Rods;
-using UnityEngine.InputSystem;
 using Assets.Scripts.Framework;
 using Assets.Scripts.Framework.Tools;
+using Assets.Scripts.Framework.Input;
 
 namespace Assets.Scripts.Controllers
 {
-	public class GameController : MonobehaviourSingleton<GameController>
+	/* **** NOTES ****
+	 * 
+	 * - Unable to catch fish on Season 2 
+	 */
+
+	public class GameController : RDMonobehaviourSingleton<GameController>
 	{
-		private Vector2 mousePos;
 		public RodBase Rod { get; private set; }
 
 		protected override void Awake()
 		{
-			PlayerPrefs.DeleteAll();
 			base.Awake();
-			GameFactory.Start();
+			MakePersistent();
 
+			GameFactory.Start();
 			ViewController.Init();
 		}
 
@@ -24,49 +28,58 @@ namespace Assets.Scripts.Controllers
 		{
 			Rod = new BasicRod();
 			Rod.CreateView(ViewController.MainCamera.transform.Find("Boat"));
-			Rod.RegisterToOnCastComnplete(ViewController.CurrentSeason.OnCast);
+			Rod.RegisterToOnCastComnplete(ViewController.OnCast);
+
+			InputManager.onClickPosition += OnClick;
+			InputManager.onSwipeDetaction += OnSwipe;
+			InputManager.onHoldDetaction += OnHold;
 		}
 
-		private void OnPosition(InputValue inputValue)
-		{
-
-			Vector2 value = inputValue.Get<Vector2>();
-			mousePos = value;
-
-			float halfX = (Screen.width / 2);
-			float padding = halfX * 0.2f;
-
-			if (mousePos.x < (halfX - padding))
-				Rod.PullLeft();
-			else if (mousePos.x > (halfX + padding))
-				Rod.PullRight();
-			else
-				Rod.NoPull();
-
-		}
-
-		private void OnClick()
+		private void OnClick(Vector3 worldPosition)
 		{
 			Rod.ReelIn();
-			Rod.TryCast(mousePos);
+			Rod.TryCast(worldPosition);
 		}
 
-		private void OnUp()
+		private void OnHold(bool holding)
 		{
+			Debug.Log("Hold: " + holding);
+			//ViewController.ApplBrakes(holding);
 		}
 
-		private void OnDown()
+		private void OnSwipe(SwipeData data)
 		{
+			Vector3 filteredDirection = data.FilteredDirection();
+
+			ShowHideLogBook(filteredDirection);
+			TryMoveBoat(filteredDirection);
 		}
 
-		private void OnRight()
+		private bool TryMoveBoat(Vector3 filteredDirection)
 		{
-			Rod.PullRight();
+
+			if (filteredDirection.y == 0)
+				return false;
+
+			if (filteredDirection.y > 0)
+				ViewController.MoveBack();
+			else
+				ViewController.MoveFoward();
+
+			return true;
 		}
 
-		private void OnLeft()
+		private void ShowHideLogBook(Vector3 filteredDirection)
 		{
-			Rod.PullLeft();
+			if (filteredDirection.x == 0)
+				return;
+
+			ViewController.UiController.ShowHideLogBook(filteredDirection.x < 0);
+		}
+
+		public void Update()
+		{
+			InputManager.Gyro();
 		}
 	}
 }

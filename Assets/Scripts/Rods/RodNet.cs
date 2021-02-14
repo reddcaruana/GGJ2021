@@ -1,6 +1,6 @@
-﻿using Assets.Scripts.Controllers;
+﻿using UnityEngine;
+using Assets.Scripts.Controllers;
 using Assets.Scripts.Framework.Utils;
-using UnityEngine;
 
 namespace Assets.Scripts.Rods
 {

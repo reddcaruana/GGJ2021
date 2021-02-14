@@ -24,7 +24,7 @@ namespace Assets.Scripts.AquaticCreatures
 			Data = data;
 			Weight = Data.GetRandomWeight();
 			Size = Weight * FishWiki.SIZE_PER_WEIGHT_RATIO;
-			Energy = new Energy((Weight / Data.IdealWeight()) * Data.BaseEnergy, 0.1f);
+			Energy = new Energy((Weight / Data.IdealWeight()) * Data.BaseEnergy, 0.3f);
 
 			SetInternal();
 

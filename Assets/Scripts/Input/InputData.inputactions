@@ -1,5 +1,5 @@
 {
-    "name": "Alisa",
+    "name": "InputData",
     "maps": [
         {
             "name": "Player",
@@ -22,42 +22,26 @@
                     "interactions": ""
                 },
                 {
-                    "name": "Up",
-                    "type": "Button",
-                    "id": "2fdf26fc-fc18-435e-9a57-b066158af838",
+                    "name": "PrimaryContact",
+                    "type": "PassThrough",
+                    "id": "8047196f-4322-4aea-ac90-266c5f18147d",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
                 },
                 {
-                    "name": "Down",
+                    "name": "Hold",
                     "type": "Button",
-                    "id": "421b571e-75e1-41ae-89c4-2d7053cdac8d",
+                    "id": "ca40613d-a8d1-4b54-a383-d3dea8f1977c",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
                 },
                 {
-                    "name": "Left",
-                    "type": "Button",
-                    "id": "6de5c7eb-4bd4-4c90-bc03-5f1e11575a34",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": ""
-                },
-                {
-                    "name": "Right",
-                    "type": "Button",
-                    "id": "1369df80-722e-476c-8020-4ea8757a21ac",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": ""
-                },
-                {
-                    "name": "LeftRightUp",
+                    "name": "Gyro",
                     "type": "Value",
-                    "id": "c1a1dbc4-4761-41a0-a5b3-8d774240a8f4",
-                    "expectedControlType": "",
+                    "id": "994eefc1-eadb-4044-b102-b93427f897c0",
+                    "expectedControlType": "Vector3",
                     "processors": "",
                     "interactions": ""
                 }
@@ -69,7 +53,18 @@
                     "path": "<Mouse>/leftButton",
                     "interactions": "Tap",
                     "processors": "",
-                    "groups": "",
+                    "groups": "PC",
+                    "action": "Click",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1f549758-1061-4c09-b206-b29caaa5c54c",
+                    "path": "<Touchscreen>/primaryTouch/tap",
+                    "interactions": "Tap",
+                    "processors": "",
+                    "groups": "Android",
                     "action": "Click",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -80,79 +75,90 @@
                     "path": "<Mouse>/position",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": "PC",
                     "action": "Position",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "a8a79ca1-1fe1-4c0c-bab4-ab5a11a2b252",
-                    "path": "<Keyboard>/#(W)",
+                    "id": "7be9cb1f-6c4d-40e0-9ee1-634c170ea10c",
+                    "path": "<Touchscreen>/primaryTouch/position",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
-                    "action": "Up",
+                    "groups": "Android",
+                    "action": "Position",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "06527ec4-c57a-4c69-b394-62e14619f63a",
-                    "path": "<Keyboard>/#(S)",
-                    "interactions": "",
+                    "id": "d481e95c-53a8-4c15-87cd-f763b337a132",
+                    "path": "<Touchscreen>/touch0/press",
+                    "interactions": "Press",
                     "processors": "",
-                    "groups": "",
-                    "action": "Down",
+                    "groups": "Android",
+                    "action": "PrimaryContact",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "a0f545a0-f27d-479e-b2d5-f41a21232d28",
-                    "path": "<Keyboard>/#(A)",
+                    "id": "79a49697-16ce-41ec-ba25-179e24b1e652",
+                    "path": "<Touchscreen>/primaryTouch/press",
                     "interactions": "Hold",
                     "processors": "",
-                    "groups": "",
-                    "action": "Left",
+                    "groups": "Android",
+                    "action": "Hold",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "a1c9f080-3b9f-4725-98d0-382f30f5952d",
-                    "path": "<Keyboard>/#(D)",
-                    "interactions": "Hold",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Right",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "67d92d8f-ac0f-4c0d-bf13-1dd40a78d1fb",
-                    "path": "<Keyboard>/#(A)",
+                    "id": "3d7050d2-b8fc-4fde-b429-551a68133f30",
+                    "path": "<Gyroscope>/angularVelocity",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
-                    "action": "LeftRightUp",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "e91bf5c1-62e4-4f66-b20c-48f4082b9d23",
-                    "path": "<Keyboard>/#(D)",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "LeftRightUp",
+                    "groups": "Android",
+                    "action": "Gyro",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
             ]
         }
     ],
-    "controlSchemes": []
+    "controlSchemes": [
+        {
+            "name": "Android",
+            "bindingGroup": "Android",
+            "devices": [
+                {
+                    "devicePath": "<Gyroscope>",
+                    "isOptional": false,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<Touchscreen>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        },
+        {
+            "name": "PC",
+            "bindingGroup": "PC",
+            "devices": [
+                {
+                    "devicePath": "<Mouse>",
+                    "isOptional": false,
+                    "isOR": false
+                },
+                {
+                    "devicePath": "<Keyboard>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        }
+    ]
 }

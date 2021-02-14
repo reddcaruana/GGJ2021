@@ -1,11 +1,11 @@
 ﻿using System;
 using UnityEngine;
+using System.Collections;
 using Assets.Scripts.Views.Rods;
+using Random = UnityEngine.Random;
 using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
-using Random = UnityEngine.Random;
-using System.Collections;
-using Assets.Scripts.Framework;
+using Assets.Scripts.Utils;
 
 namespace Assets.Scripts.Rods
 {
@@ -15,7 +15,7 @@ namespace Assets.Scripts.Rods
 		public bool IsNibbling { get; private set; }
 		public bool CanCatch { get; private set; }
 
-		private bool isReseting;
+		public bool IsReseting { get; private set; }
 		private Vector3 startWorldPos;
 
 		public bool HasView => view != null;
@@ -68,12 +68,12 @@ namespace Assets.Scripts.Rods
 			float pauseDuration = oneNibbleDuration * randomValue;
 			float sinkAndRiseDuration = ((1f - randomValue) * oneNibbleDuration) / 2f;
 
-			CoroutineRunner.RunCoroutine(NibbleWait(pauseDuration, Sink));
+			CoroutineRunner.RunCoroutine(NibbleWait(pauseDuration, Nibble));
 
-			void Sink()
+			void Nibble()
 			{
 				if (HasView)
-					view.Sink(sinkAndRiseDuration);
+					view.Nibble(sinkAndRiseDuration);
 
 				CoroutineRunner.RunCoroutine(NibbleWait(sinkAndRiseDuration, Rise));
 			}
@@ -81,7 +81,7 @@ namespace Assets.Scripts.Rods
 			void Rise()
 			{
 				if (HasView)
-					view.Rise(sinkAndRiseDuration);
+					view.Float();
 
 				CoroutineRunner.RunCoroutine(NibbleWait(sinkAndRiseDuration, OnRise));
 			}
@@ -104,28 +104,38 @@ namespace Assets.Scripts.Rods
 			CanCatch = false;
 		}
 
-		public void CatchWindow(float duration, Action onComplete = null)
+		public void CatchWindow(float duration, Action onEscape)
 		{
 			CanCatch = true;
 			
 			if (HasView)
 				view.SinkAndDisapear(0.2f);
 
-			CoroutineRunner.Wait(duration, OnComplete);
+			CoroutineRunner.RunCoroutine(CatchWindowCoroutine(duration, onEscape));
+		}
 
-			void OnComplete()
+		private IEnumerator CatchWindowCoroutine(float duration, Action onEscape)
+		{
+			float startTime = Time.time;
+			while (Time.time - startTime < duration)
 			{
-				CanCatch = false;
-				onComplete?.Invoke();
+				// OnHooked CanCatch will be false
+				if (!CanCatch)
+					yield break;
+				yield return null;
 			}
+			CanCatch = false;
+			onEscape();
 		}
 
 		public void Reset()
 		{
-			if (isReseting)
+			if (IsReseting)
 				return;
 
-			isReseting = true;
+			DebugUtils.Log("Reeled In - Reset ........./!");
+
+			IsReseting = true;
 
 			if (HasView)
 				view.Reset(startWorldPos, 0.5f, Continue);
@@ -137,7 +147,7 @@ namespace Assets.Scripts.Rods
 				IsCasted = false;
 				IsNibbling = false;
 				CanCatch = false;
-				isReseting = false;
+				IsReseting = false;
 			}
 
 		}

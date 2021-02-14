@@ -3,16 +3,29 @@ using DG.Tweening;
 using UnityEngine;
 using Assets.Scripts.Framework;
 using Assets.Scripts.AssetsManagers;
+using Assets.Scripts.Framework.Tools;
+using Assets.Scripts.Framework.Utils;
+using LoopType = Assets.Scripts.Framework.Tools.LoopType;
 
 namespace Assets.Scripts.Views.Rods
 {
 	public class RodFloatView : MonoBehaviour
 	{
+		private enum AnimationType { Float, Nibble, Splash}
+		private const int FLOATING_FPS = 10;
+		private const int NIBBLING_FPS = 5;
+		private const int SPLASH_FPS = 8;
+
 		private readonly Vector3 StartScale = Vector3.one * 2f;
 		private Vector3 PeakScale;
 		private Vector3 FloatingScale;
 
 		private SpriteRenderer spriteRenderer;
+		private RDAnimator animator;
+		private Sprite[] floatingSprites = new Sprite[34];
+		private Sprite[] nibbleSprites = new Sprite[17];
+		private Sprite[] splashSprites = new Sprite[11];
+		private AnimationType animationType;
 
 		private void Awake()
 		{
@@ -20,6 +33,17 @@ namespace Assets.Scripts.Views.Rods
 			FloatingScale = StartScale * 0.7f;
 
 			spriteRenderer = transform.Find("SpriteRodFloat").GetComponent<SpriteRenderer>();
+
+			for (int i = 0; i < floatingSprites.Length; i++)
+				floatingSprites[i] = AssetLoader.ME.Loader<Sprite>($"Sprites/RodFloat/Floating/floating{i + 1}");
+
+			for (int i = 0; i < nibbleSprites.Length; i++)
+				nibbleSprites[i] = AssetLoader.ME.Loader<Sprite>($"Sprites/RodFloat/Nibble/floatnibble{i + 1}");
+
+			for (int i = 0; i < splashSprites.Length; i++)
+				splashSprites[i] = AssetLoader.ME.Loader<Sprite>($"Sprites/RodFloat/Splash/splash{i + 1}");
+
+			animator = new RDAnimator(floatingSprites.Length, OnFrameUpdate);
 		}
 
 		public void Cast(Vector3 targetWorldPosition, float duration, Action onComplete)
@@ -39,31 +63,66 @@ namespace Assets.Scripts.Views.Rods
 
 			transform.DOLocalRotateQuaternion(Quaternion.identity, duration).SetEase(Ease.OutSine);
 			transform.DOMove(targetWorldPosition, duration).onComplete = () => onComplete?.Invoke();
+
+			Float();
 		}
 
-		public void Sink(float duration)
-		{
-			spriteRenderer.sprite = AssetLoader.ME.Loader<Sprite>("Sprites/RodFloat/RodFloatSunk");
-		}
+		public void Nibble(float duration) => Animate(AnimationType.Nibble, nibbleSprites.Length, (int)(NIBBLING_FPS * duration));
 
-		public void Rise(float duration)
+		public void Float() => Animate(AnimationType.Float, floatingSprites.Length, FLOATING_FPS);
+
+		private void HalfNibble(float duration) => Animate(AnimationType.Nibble, nibbleSprites.Length / 2, (int)(NIBBLING_FPS * duration), isLoop: false);
+
+		private void Splash() => Animate(AnimationType.Splash, splashSprites.Length, SPLASH_FPS, isLoop: false);
+
+		private void Animate(AnimationType type, int frames, int fps, bool isLoop = true)
 		{
-			spriteRenderer.sprite = AssetLoader.ME.Loader<Sprite>("Sprites/RodFloat/RodFloatRise");
+			animator.Stop();
+			animationType = type;
+			animator.Frames = frames;
+			animator.FPS = fps;
+			animator.Loop = isLoop ? LoopType.Normal : LoopType.None;
+			animator.Play();
 		}
 
 		public void SinkAndDisapear(float duration)
 		{
-			Sink(0);
-			spriteRenderer.DOColor(Statics.COLOR_ZERO, duration);
+			HalfNibble(duration);
+			spriteRenderer.DOFade(0, duration).onComplete = OnComplete;
+
+			void OnComplete()
+			{
+				Splash();
+				spriteRenderer.color = Statics.COLOR_WHITE;
+				CoroutineRunner.WaitUntil(() => animator.State == Framework.Tools.AnimationState.Stop, () => 
+				{
+					spriteRenderer.DOFade(0, 0.1f);
+				});
+			}
 		}
 
 		public void Reset(Vector3 targetWorldPosition, float duration, Action onComplete = null)
 		{
-			Rise(0);
+			Debug.Log("Reset Float");
+			Float();
+			spriteRenderer.color = Statics.COLOR_ZERO;
 			spriteRenderer.DOColor(Statics.COLOR_WHITE, duration * 0.2f);
 
 			transform.DOScale(StartScale, duration).SetEase(Ease.InOutSine);
-			transform.DOMove(targetWorldPosition, duration).SetEase(Ease.InOutSine).onComplete = () => onComplete?.Invoke();
+			transform.DOMove(targetWorldPosition, duration).SetEase(Ease.InOutSine).onComplete = OnComplete;
+
+			void OnComplete()
+			{
+				animator.Stop();
+				onComplete?.Invoke();
+			}
+		}
+
+		private void OnFrameUpdate(int frameIndex)
+		{
+			spriteRenderer.sprite =
+				animationType == AnimationType.Float ? floatingSprites[frameIndex] :
+				animationType == AnimationType.Nibble ? nibbleSprites[frameIndex] : splashSprites[frameIndex];
 		}
 
 	}

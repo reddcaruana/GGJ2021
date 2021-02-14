@@ -6,6 +6,7 @@ using Assets.Scripts.Constants;
 using Assets.Scripts.Controllers;
 using Assets.Scripts.Framework.Tools;
 using Assets.Scripts.Framework.Utils;
+using Assets.Scripts.Views.Fish;
 
 namespace Assets.Scripts.AquaticCreatures.Fish
 {
@@ -13,32 +14,114 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 	{
 		private readonly Vector3[] directionVectors = new Vector3[]
 		{
-			new Vector3(0.5f, 0.5f, 0),
-			new Vector3(0f, 1f, 0f),
-			new Vector3(0f, 0.5f,0.5f)
+			new Vector3(-0.5f, 0.5f, 0),
+			new Vector3(0.5f, 0.5f, 0f)
 		};
 
-		private readonly AccelerationModule accelerationModule;
+		private readonly RDAccelerationModule accelerationModule;
 		private readonly FishController fishController;
 		private readonly RodBase rod;
 		private readonly Vector2 realInTarget;
 		private readonly Area2D area;
-
+		private int directionIndex;
 
 		public FightingModule(FishController fishController, RodBase rod)
 		{
 			this.fishController = fishController;
 			this.rod = rod;
 
-			accelerationModule = new AccelerationModule(OnMove, fishController.GetViewWorldPosition);
-			accelerationModule.SetBounds(CheckPosition);
-			CoroutineRunner.RunCoroutine(FightCoroutine());
 			realInTarget = new Vector2(0f, ViewController.Area.BottomRightCorner.y);
-
 			area = new Area2D(ViewController.CurrentSeason.FishTankArea.Width, ViewController.Area.Height, ViewController.MainCamera.transform.position);
+
+			accelerationModule = new RDAccelerationModule(OnMove, fishController.GetViewWorldPosition);
+			accelerationModule.IsActive = true;
+
+			ShowDebug();
+			CoroutineRunner.RunCoroutine(FightCoroutine());
 		}
 
-		private void OnMove(Vector3 newPos) => fishController.ManualSwim(newPos);
+		private IEnumerator FightCoroutine()
+		{
+			float redirectStartTime = 0f;
+			float redirectTime = 0;
+			PullState fishPullState = PullState.None;
+
+			float startRestingTime = 0;
+
+			while (true)
+			{
+				DebugViewUpdate();
+				DebugInfo(fishPullState);
+
+
+				if (!fishController.Energy.IsResting)
+				{
+					if (Time.time - redirectStartTime >= redirectTime)
+					{
+						redirectTime = Random.Range(4, 6);
+						redirectStartTime = Time.time;
+						directionIndex = RedirectFish();
+						fishPullState = FishPullState(directionIndex);
+					}
+
+					accelerationModule.SetSpeed(0.1f * Time.deltaTime);
+				}
+
+				if (rod.Net.IsIn(fishController.GetViewWorldPosition()))
+				{
+					rod.CaughtFish(fishController.Caught());
+					break;
+				}
+
+				if (!fishController.Energy.IsResting && rod.Energy.IsResting && Time.time - startRestingTime >= 3f)
+				{
+					DebugUtils.Log("Escaped due to much resting.");
+					rod.FishEscaped();
+					break;
+				}
+
+				if (rod.Energy.Value == 0)
+				{
+					DebugUtils.Log("Escaped due to line snap.");
+					rod.FishEscaped();
+					break;
+				}
+
+				if (rod.PullState == fishPullState && !rod.Energy.IsResting)
+				{
+					rod.Energy.Rest();
+					startRestingTime = Time.time;
+					DebugUtils.Log("Rod Start Resting");
+				}
+				else if (rod.PullState != fishPullState)
+				{
+					rod.Energy.StopResting();
+
+					if ((rod.PullState == PullState.Left && fishPullState == PullState.Right) || 
+						(rod.PullState == PullState.Right && fishPullState == PullState.Left))
+					{
+						ConsumeFishEnergy();
+						ConsumeRodEnergy();
+					}
+					else
+						ConsumeRodEnergy();
+				}
+
+				yield return null;
+			}
+
+			accelerationModule.IsActive = false;
+			HideDebug();
+		}
+
+		// Bounds are check after acceleration so the e can keep the fish facing the correct direction
+		// This will visually help the player know which direction they need to pull with the rid in order to counter.
+		private void OnMove(Vector3 newPos)
+		{
+			Vector3 lookAhead = (directionVectors[directionIndex] * FishView.AHEAD) + newPos;
+			fishController.ManualSwim(CheckPosition(newPos), lookAhead, isFaceAhead: false);
+		}
+
 
 		private Vector3 CheckPosition(Vector3 newPos)
 		{
@@ -57,67 +140,9 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			accelerationModule.SetSpeed(speed);
 		}
 
-		private IEnumerator FightCoroutine()
+		private int RedirectFish()
 		{
-			int directionIndex = 0;
-			float redirectStartTime = 0f;
-			float redirectTime = 0;
-			PullState fishPullState = PullState.None;
-
-			float startRestingTime = 0;
-
-			while (true)
-			{
-				if (Time.time - redirectStartTime >= redirectTime)
-				{
-					redirectTime = Random.Range(2f, 4f);
-					redirectStartTime = Time.time;
-					directionIndex = RedirectFish(directionIndex);
-					fishPullState = FishPullState(directionIndex);
-				}
-
-				if (!fishController.Energy.IsResting)
-					accelerationModule.SetSpeed(0.05f * Time.deltaTime);
-
-				if (rod.Net.IsIn(fishController.GetViewWorldPosition()))
-				{
-					rod.CaughtFish(fishController.Caught());
-					yield break;
-				}
-
-				if (rod.Energy.IsResting && Time.time - startRestingTime >= 3f)
-				{
-					rod.FishEscaped();
-					fishController.Escape();
-					yield break;
-				}
-
-				if (rod.PullState == fishPullState && !rod.Energy.IsResting)
-				{
-					rod.Energy.Rest();
-					startRestingTime = Time.time;
-				}
-				else
-				{
-					rod.Energy.StopResting();
-
-					if ((rod.PullState == PullState.Left && fishPullState == PullState.Right) || 
-						(rod.PullState == PullState.Right && fishPullState == PullState.Left))
-					{
-						ConsumeFishEnergy();
-						ConsumeRodEnergy();
-					}
-					else
-						ConsumeRodEnergy();
-				}
-
-				yield return null;
-			}
-		}
-
-		private int RedirectFish(int directionIndex)
-		{
-			directionIndex += Random.Range(1, directionVectors.Length);
+			int directionIndex = Random.Range(0, directionVectors.Length);
 			directionIndex = MathUtils.LoopIndex(directionIndex, directionVectors.Length);
 			accelerationModule.SetDirection(directionVectors[directionIndex]);
 			return directionIndex;
@@ -128,14 +153,25 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			switch (directionIndex)
 			{
 				case 0: return PullState.Left;
-				case 1: return PullState.None;
-				case 2: return PullState.Right;
+				case 1: return PullState.Right;
 				default: DebugUtils.LogError("[FightModule] Unable to Handle directiuonIndex: " + directionIndex);
 					return PullState.None;
 			}
 		}
 
 		private void ConsumeFishEnergy() => fishController.Energy.Consume(rod.Energy.BlowBack * Time.deltaTime);
-		private void ConsumeRodEnergy() => rod.Energy.Consume(fishController.Energy.BlowBack * Time.deltaTime);
+		private void ConsumeRodEnergy() => rod.Energy.Consume(fishController.Energy.BlowBack * Time.deltaTime, autoRest: false);
+
+
+		[System.Diagnostics.Conditional("RDEBUG")]
+		private void ShowDebug() => ViewController.UiController.DebugShow(rod.Energy.Max, fishController.Energy.Max);
+		[System.Diagnostics.Conditional("RDEBUG")]
+		private void HideDebug() => ViewController.UiController.DebugHide();
+		[System.Diagnostics.Conditional("RDEBUG")]
+		private void DebugViewUpdate() => ViewController.UiController.UpdateFightValues(rod.Energy.Value, fishController.Energy.Value);
+		[System.Diagnostics.Conditional("RDEBUG")]
+		private void DebugInfo(PullState fishPullState) => 
+			ViewController.UiController.UpdateInfo(
+				$"Rod: {rod.PullState}, Fish: {fishPullState}\nDV: {VectorUtils.Print(accelerationModule.DirectionVector)}");
 	}
 }

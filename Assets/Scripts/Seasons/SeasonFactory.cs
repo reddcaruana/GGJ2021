@@ -1,26 +1,25 @@
-﻿using UnityEngine;
-using Assets.Scripts.Utils;
+﻿using Assets.Scripts.Utils;
+using Assets.Scripts.Player;
 using Assets.Scripts.Constants;
+using Assets.Scripts.Seasons.Specific;
 
 namespace Assets.Scripts.Seasons
 {
 	public static class SeasonFactory
 	{
-		public static Season CreateSeason(Transform parent, SeasonAreaType type, Vector3 baseWorldPos)
+		public static Season CreateSeason(SeasonAreaType type)
 		{
-			Season seasons = ConstructSeason(type, baseWorldPos);
-			seasons.CreateView(parent);
-			seasons.CreateFishViews();
-			seasons.SetAllFish();
-			seasons.DistriubuteFish();
+			Season seasons = ConstructSeason(type);
+			PlayerData.LogBook.RegisterToEntryUpdtae(seasons.PayWall.Refresh);
 			return seasons;
 		}
 
-		private static Season ConstructSeason(SeasonAreaType type, Vector3 baseWorldPos)
+		private static Season ConstructSeason(SeasonAreaType type)
 		{
 			switch (type)
 			{
-				case SeasonAreaType.One: return new Summer(baseWorldPos);
+				case SeasonAreaType.One: return new Summer();
+				case SeasonAreaType.Two: return new Fall();
 				default: DebugUtils.LogError($"[SeasonFactory] {type} Not supported"); return null;
 			}
 		}

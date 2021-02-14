@@ -2,13 +2,22 @@
 using UnityEngine;
 using DG.Tweening;
 using Assets.Scripts.Framework;
+using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.AquaticCreatures.Fish;
+using Assets.Scripts.Framework.Tools;
+using LoopType = Assets.Scripts.Framework.Tools.LoopType;
 
 namespace Assets.Scripts.Views.Fish
 {
 	public class FishView : MonoBehaviour
 	{
+		public const float AHEAD = 500f;
+		private const int SWIMMING_FPS = 8;
+		private const int STATIC_FPS = (int)(SWIMMING_FPS * 0.3f);
+		private const int ESCAPE_FPS = SWIMMING_FPS * 4;
+
+		private static readonly Sprite[] FishSilhouetteSprites = new Sprite[8];
 		public bool IsManualOverride { get; private set; }
 
 		private static readonly Color SOLID_COLOR = Statics.COLOR_BLACK;
@@ -17,10 +26,22 @@ namespace Assets.Scripts.Views.Fish
 		private Vector3 endPos = new Vector3();
 		private bool isIdle;
 
+		private RDAnimator animator;
+
 
 		private void Awake()
 		{
+			if (FishSilhouetteSprites[0] == null)
+			{
+				for (int i = 0; i < FishSilhouetteSprites.Length; i++)
+					FishSilhouetteSprites[i] = AssetLoader.ME.Loader<Sprite>($"Sprites/FishSilhouette/fishSilhouette{i + 1}");
+			}
+
+			animator = new RDAnimator(FishSilhouetteSprites.Length, OnFrameUpdate);
+			animator.Loop = LoopType.PingPong;
+
 			spriteRenderer = transform.Find("SpriteFish").GetComponent<SpriteRenderer>();
+			spriteRenderer.sprite = FishSilhouetteSprites[0];
 			spriteRenderer.color = Statics.COLOR_ZERO;
 		}
 
@@ -82,6 +103,7 @@ namespace Assets.Scripts.Views.Fish
 			if (!isIdle)
 				return;
 
+			PlaySwiAnimation();
 			spriteRenderer.transform.RotateAround(transform.position, Vector3.forward, -20 * Time.deltaTime);
 		}
 
@@ -91,6 +113,7 @@ namespace Assets.Scripts.Views.Fish
 			IsManualOverride = false;
 
 			spriteRenderer.DOKill();
+			PlayEscapeAimation();
 
 			Vector3 target = spriteRenderer.transform.localPosition;
 			float duration = Vector3.Distance(target, startPos) / Vector3.Distance(startPos, endPos);
@@ -107,6 +130,7 @@ namespace Assets.Scripts.Views.Fish
 				.SetEase(Ease.InOutSine);
 		}
 
+
 		public void ApprochFloat(Vector3 localPosition, Action onComplete = null)
 		{
 			const float duration = 1f;
@@ -118,12 +142,25 @@ namespace Assets.Scripts.Views.Fish
 			Face(localPosition, duration / 2f);
 			spriteRenderer.transform.DOLocalMove(localPosition, duration)
 				.SetEase(Ease.InOutSine)
-				.OnComplete(() => onComplete?.Invoke());
+				.onComplete = OnComplete;
+
+			void OnComplete()
+			{
+				PlayStaticAnimation();
+				onComplete?.Invoke();
+			}
 		}
 
 		public void Caught()
 		{
 			spriteRenderer.color = Statics.COLOR_ZERO;
+		}
+
+		private void FaceAHead(Vector2 localPosition, float duration, Action onComplete = null)
+		{
+			Vector2 spriteLocalPos = spriteRenderer.transform.localPosition;
+			Vector3 aheadLocalPos = ((localPosition - spriteLocalPos) * AHEAD) + localPosition;
+			Face(aheadLocalPos, duration, onComplete);
 		}
 
 		private void Face(Vector2 localPosition, float duration, Action onComplete = null)
@@ -133,6 +170,8 @@ namespace Assets.Scripts.Views.Fish
 			spriteRenderer.transform.DOLocalRotateQuaternion(Quaternion.Euler(rotation), duration)
 				.SetEase(Ease.InOutSine)
 				.onComplete = () => onComplete?.Invoke();
+			
+			DebugPositionTarget(localPosition);
 		}
 
 		public void SetManualOverride(bool value)
@@ -142,14 +181,53 @@ namespace Assets.Scripts.Views.Fish
 				isIdle = false;
 		}
 
-		public void ManualOverride(Vector2 newWorldPos)
+		public void ManualOverride(Vector2 newWorldPos) => ManualOverride(newWorldPos, newWorldPos);
+
+		public void ManualOverride(Vector2 newWorldPos, Vector3 lookWorldPosition, bool isFaceAHead = true)
 		{
 			if (!IsManualOverride)
 				return;
 
-			if (newWorldPos.y > spriteRenderer.transform.position.y)
-				Face(transform.InverseTransformPoint(newWorldPos), 0.1f);
+			if (lookWorldPosition.y > spriteRenderer.transform.position.y)
+			{
+				if (isFaceAHead)
+					FaceAHead(transform.InverseTransformPoint(lookWorldPosition), 0.1f);
+				else
+					Face(transform.InverseTransformPoint(lookWorldPosition), 0.1f);
+			}
+
 			spriteRenderer.transform.position = newWorldPos;
+		}
+
+		public void PlaySwiAnimation() => PlayAnimation(SWIMMING_FPS);
+		public void PlayStaticAnimation() => PlayAnimation(STATIC_FPS);
+		public void PlayEscapeAimation() => PlayAnimation(ESCAPE_FPS);
+
+		private void PlayAnimation(int fps)
+		{
+			animator.FPS = fps;
+			animator.Play();
+		}
+
+		private void OnFrameUpdate(int frame) => spriteRenderer.sprite = FishSilhouetteSprites[frame];
+
+		Transform debugTarget;
+
+		[System.Diagnostics.Conditional("RDEBUG")]
+		void DebugPositionTarget(Vector3 localPos)
+		{
+			if (debugTarget == null)
+			{
+				debugTarget = new GameObject("DebugTarget" + gameObject.name).transform;
+				debugTarget.SetParent(spriteRenderer.transform.parent);
+				debugTarget.ResetTransforms();
+				SpriteRenderer renderer = debugTarget.gameObject.AddComponent<SpriteRenderer>();
+				renderer.sprite = AssetLoader.ME.Loader<Sprite>("Sprites/Circle");
+				renderer.color = Color.red;
+				renderer.sortingOrder = 100;
+			}
+
+			debugTarget.localPosition = localPos;
 		}
 	}
 }

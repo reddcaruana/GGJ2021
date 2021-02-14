@@ -2,43 +2,47 @@
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
+using Assets.Scripts.Constants;
 using Assets.Scripts.Framework;
 using Assets.Scripts.Framework.Ui;
-using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.AquaticCreatures.Fish;
-using Assets.Scripts.Constants;
 
-namespace Assets.Scripts.Ui
+namespace Assets.Scripts.Ui.Screens
 {
-	public class CaughtFishScreen : MonoBehaviour
+	public class CaughtFishScreen : ScreenBase
 	{
-		private UiTransitionElement bucketTransitionElement;
+		private RDUiTransitionElement bucketTransitionElement;
 		private Image fishImage;
 
 		private Vector3 fishOriginalScale;
 		private Vector3 fishOriginalPos;
 
-		private void Awake()
+		protected override void Awake()
 		{
-			bucketTransitionElement = transform.Find("ImageBucket").gameObject.AddComponent<UiTransitionElement>();
-			bucketTransitionElement.InitTransitions(UiTransitionAttachment.State.Visible);
+			base.Awake();
+
+			bucketTransitionElement = transform.Find("ImageBucket").gameObject.AddComponent<RDUiTransitionElement>();
 			bucketTransitionElement.IsMovable = true;
-			Vector2 pos = bucketTransitionElement.rectTransform.anchoredPosition;
-			pos.y -= 1000f;
-			bucketTransitionElement.HidePos = pos;
 			bucketTransitionElement.ShowTime = 0.5f;
 			bucketTransitionElement.HideTime = 1;
+			bucketTransitionElement.InitTransitions(RDUiTransitionAttachment.State.Visible);
+			Vector2 hiddenPos = rectTransform.anchoredPosition;
+			hiddenPos.y -= rectTransform.rect.height;
+			bucketTransitionElement.HidePos = hiddenPos;
 			bucketTransitionElement.HideInstantly();
+			bucketTransitionElement.DisableOnHide = true;
 
 			fishImage = transform.Find("ImageFish").GetComponent<Image>();
 			fishOriginalScale = fishImage.rectTransform.localScale;
 			fishImage.rectTransform.localScale = Statics.VECTOR3_ZERO;
 			fishOriginalPos = fishImage.rectTransform.anchoredPosition;
+
 		}
 
 		public void Show(FishTypeData data, Action onComplete = null)
 		{
+			ShowInstantly();
 			fishImage.sprite = FishWiki.GetSprite(data);
 			fishImage.rectTransform.DOScale(fishOriginalScale, 0.5f).SetEase(Ease.OutElastic).onComplete = () => 
 			{

@@ -1,21 +1,23 @@
 ﻿using UnityEngine;
-using Assets.Scripts.Paywalls;
+using Assets.Scripts.Utils;
 using Assets.Scripts.Constants;
 using Assets.Scripts.Framework;
+using Assets.Scripts.Controllers;
 using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Tools;
+using Assets.Scripts.Seasons.Paywalls;
 
-namespace Assets.Scripts.Views
+namespace Assets.Scripts.Views.Seasons.Paywalls
 {
 	public class PaywallView : MonoBehaviour
 	{
 		private SpriteRenderer mainSprite;
 		private Sprite[] mainSpriteFrames = new Sprite[2];
 		private Sprite mainSpriteFinal;
-		private RAnimator animator;
+		private RDAnimator animator;
 
 		private string seasonStr;
-		private PaywallRequiredView[] spritrs;
+		private PaywallRequiredView[] sprits;
 
 		private void Awake()
 		{
@@ -23,30 +25,41 @@ namespace Assets.Scripts.Views
 			Transform grp = transform.Find("Required_grp");
 			SpriteRenderer[] renderers = grp.GetComponentsInChildren<SpriteRenderer>();
 			
-			animator = new RAnimator(mainSpriteFrames.Length, OnFrameUpdate);
-			animator.FPS = 6f;
-			animator.IsLoop = true;
+			animator = new RDAnimator(mainSpriteFrames.Length, OnFrameUpdate);
+			animator.FPS = 3f;
+			animator.Loop = LoopType.Normal;
 
-			spritrs = new PaywallRequiredView[renderers.Length];
+			sprits = new PaywallRequiredView[renderers.Length];
 			for (int i = 0; i < renderers.Length; i++)
-				spritrs[i] = new PaywallRequiredView(renderers[i]);
+				sprits[i] = new PaywallRequiredView(renderers[i]);
 		}
 
-		public void Set(FishRequired[] requiredData, string seasonStr)
+		public void Set(FishRequired[] requiredData, string seasonStr, Vector3[] fishRequiredLocalPosition)
 		{
-			int s = 0;
-			for (int i = 0; i < requiredData.Length; i++)
+			DebugUtils.Assert(fishRequiredLocalPosition.Length == requiredData.Length, 
+				$"[PaywallView] Invalid Count => Data: {requiredData.Length} vs Positions: {fishRequiredLocalPosition.Length}");
+
+			for (int i = 0, s = 0; i < requiredData.Length; i++)
 			{
 				for (int j = 0; j < requiredData[i].Required; j++)
-					spritrs[s++].Set(requiredData[i]);
+				{
+					sprits[s].Set(requiredData[i], fishRequiredLocalPosition[i]);
+					sprits[s++].Enable();
+				}
 			}
+
+			for (int i = requiredData.Length; i < sprits.Length; i++)
+				sprits[i].Disable();
 
 			this.seasonStr = seasonStr;
 
 			for (int i = 0; i < mainSpriteFrames.Length; i++)
-				mainSpriteFrames[i] = AssetLoader.ME.Loader<Sprite>($"Sprites/Paywall/Paywall{seasonStr}{i}");
+				mainSpriteFrames[i] = AssetLoader.ME.Loader<Sprite>($"Sprites/Paywall/{seasonStr}/Paywall{seasonStr}{i}");
 
-			mainSpriteFinal = AssetLoader.ME.Loader<Sprite>($"Sprites/Paywall/Paywall{seasonStr}Final");
+			mainSpriteFinal = AssetLoader.ME.Loader<Sprite>($"Sprites/Paywall/{seasonStr}/Paywall{seasonStr}Final");
+
+			mainSprite.sprite = mainSpriteFrames[0];
+			transform.localScale = Statics.VECTOR3_ONE * (ViewController.Area.Width / mainSprite.size.x);
 		}
 
 		public void PlayAnimation(bool value)
@@ -59,16 +72,18 @@ namespace Assets.Scripts.Views
 
 		public void Finished()
 		{
+			mainSpriteFrames = null;
+
 			mainSprite.sprite = mainSpriteFinal;
-			for (int i = 0; i < spritrs.Length; i++)
-				spritrs[i].Disable();
+			for (int i = 0; i < sprits.Length; i++)
+				sprits[i].Disable();
 		}
 
 
 		public void Refresh()
 		{
-			for (int i = 0; i < spritrs.Length; i++)
-				spritrs[i].Refresh();
+			for (int i = 0; i < sprits.Length; i++)
+				sprits[i].Refresh();
 		}
 
 		private void OnFrameUpdate(int index) =>
@@ -86,9 +101,10 @@ namespace Assets.Scripts.Views
 			SpriteRenderer = spriteRenderer;
 		}
 
-		public void Set(FishRequired required)
+		public void Set(FishRequired required, Vector3 localPosition)
 		{
 			this.required = required;
+			SpriteRenderer.transform.localPosition = localPosition;
 			SpriteRenderer.sprite = FishWiki.GetSprite(required.Type);
 			Refresh();
 		}
@@ -106,6 +122,9 @@ namespace Assets.Scripts.Views
 			
 			SpriteRenderer.color = color;
 		}
+
+		public void Enable() => 
+			SpriteRenderer.gameObject.SetActive(true);
 
 		public void Disable() => 
 			SpriteRenderer.gameObject.SetActive(false);

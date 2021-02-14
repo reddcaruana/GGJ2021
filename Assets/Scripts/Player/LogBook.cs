@@ -1,16 +1,17 @@
-﻿using UnityEngine;
-using Assets.Scripts.Utils;
+﻿using System;
+using UnityEngine;
 using System.Collections.Generic;
 using Assets.Scripts.AquaticCreatures.Fish;
 
 namespace Assets.Scripts.Player
 {
-	[System.Serializable]
+	[Serializable]
 	public class LogBook
 	{
 		public const string LOG_BOOK_KEY = "pdlogbook";
 
 		[SerializeField] private List<FishLogData> log = new List<FishLogData>();
+		private Action onEntryUpdate;
 
 		public bool TryAdd(FishLogData data)
 		{
@@ -26,8 +27,12 @@ namespace Assets.Scripts.Player
 				return false;
 
 			Save();
+			onEntryUpdate?.Invoke();
 			return true;
 		}
+
+		public void RegisterToEntryUpdtae(Action onEntryUpdate) => this.onEntryUpdate += onEntryUpdate;
+		public void UnregisterToEntryUpdtae(Action onEntryUpdate) => this.onEntryUpdate -= onEntryUpdate;
 
 		public int IndexOf(FishTypeData data)
 		{
@@ -54,10 +59,11 @@ namespace Assets.Scripts.Player
 
 		public FishLogData GetDataAt(int index) => log[index];
 
+		public FishLogData[] ToArray() => log.ToArray();
+
 		public void Save()
 		{
 			string json = ToJson();
-			DebugUtils.Log("*-* ToJson: " + json);
 			PlayerPrefs.SetString(LOG_BOOK_KEY, json);
 		}
 		public string ToJson() => JsonUtility.ToJson(this);

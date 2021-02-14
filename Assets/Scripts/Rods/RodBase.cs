@@ -1,23 +1,31 @@
 ﻿using System;
 using UnityEngine;
 using Assets.Scripts.Utils;
+using Assets.Scripts.Player;
 using Assets.Scripts.Generic;
 using Assets.Scripts.Constants;
+using Assets.Scripts.Rods.Tilt;
 using Assets.Scripts.Views.Rods;
 using Assets.Scripts.Controllers;
 using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.AquaticCreatures;
 using Assets.Scripts.AquaticCreatures.Fish;
-using Assets.Scripts.Player;
 
 namespace Assets.Scripts.Rods
 {
 	public abstract class RodBase
 	{
 		public abstract string NiceName { get; }
+		private readonly RodTiltHandler RodTiltHandler = RodTiltFactory.Create();
 		private readonly RodFloat RodFloat = new RodFloat();
 		public readonly RodNet Net;
 		public readonly Energy Energy;
+		public PullState PullState = PullState.None;
+		public bool IsCasted => RodFloat.IsCasted;
+
+		protected readonly float ReelInCoolDownTime = 0.4f;
+		private float startedReelInCoolDownTime = 1f;
+		private bool isCoolDown => Time.time - startedReelInCoolDownTime <= ReelInCoolDownTime;
 
 		private Func<Vector3, IAquaticCreature> onCastComplete;
 
@@ -25,12 +33,13 @@ namespace Assets.Scripts.Rods
 		private RodBaseView view;
 
 		private IAquaticCreature potentialCatch;
-		public PullState PullState = PullState.None;
 
 		public RodBase()
 		{
 			Net = new RodNet(5);
-			Energy = new Energy(20, 0.1f);
+			Energy = new Energy(20, 0.05f);
+			RodFloat.Reset();
+			RodTiltHandler.Init(PullLeft, PullRight);
 		}
 
 		public void CreateView(Transform parent)
@@ -39,6 +48,7 @@ namespace Assets.Scripts.Rods
 			view.Set(NiceName);
 			view.SetPosition(Net.CenterWorldPos);
 			RodFloat.CreateView(view.transform);
+			RodTiltHandler.Start();
 			DebugUtils.CreateDebugAreaView(Net.Radius, Color.red, "Net", -5, view.transform);
 		}
 
@@ -48,24 +58,25 @@ namespace Assets.Scripts.Rods
 		public void UnregisterFromOnCastComnplete(Func<Vector3, IAquaticCreature> callback) =>
 			onCastComplete -= callback;
 
-		public bool TryCast(Vector3 screenPosition)
+		public bool TryCast(Vector3 worldPosition)
 		{
-			if (RodFloat.IsCasted)
+			if (RodFloat.IsCasted || !ViewController.CanCast(worldPosition))
 				return false;
-			return Cast(screenPosition);
+
+			Cast(worldPosition);
+			return true;
 		}
 
-		private bool Cast(Vector2 screenPosition)
+		private void Cast(Vector3 worldPosition)
 		{
-			if (!ViewController.CurrentSeason.ValidatePosition(screenPosition, out Vector3 worldPos))
-				return false;
-
-			RodFloat.Cast(worldPos, 0.5f, OnCastCompolete);
+			DebugUtils.Log("Casting ........./Z");
+			RodFloat.Cast(worldPosition, 0.5f, OnCastCompolete);
 			
-			void OnCastCompolete() => 
-				CheckForPotentialCatch(onCastComplete?.Invoke(worldPos));
-			
-			return true;
+			void OnCastCompolete()
+			{
+				if (!RodFloat.IsReseting)
+					CheckForPotentialCatch(onCastComplete?.Invoke(worldPosition));
+			}
 		}
 
 		private void CheckForPotentialCatch(IAquaticCreature creature)
@@ -73,14 +84,14 @@ namespace Assets.Scripts.Rods
 			if (creature == null)
 				return;
 
+			DebugUtils.Log($"Found Fish: {creature.Data.Type.NiceName}  ~~~~ >sSD");
+
 			potentialCatch = creature;
 			RodFloat.Nibble(6f, CatchWindow);
+			
+			void CatchWindow() => RodFloat.CatchWindow(2f, FishEscaped);
 		}
 
-		void CatchWindow()
-		{
-			RodFloat.CatchWindow(2f);
-		}
 
 		public void ReelIn()
 		{
@@ -90,20 +101,25 @@ namespace Assets.Scripts.Rods
 			// Fish Escapes if you reel in while Nibbling
 			if (RodFloat.IsNibbling)
 			{
-				potentialCatch.Escape();
-				RodFloat.StopNibble();
-				RodFloat.Reset();
-				potentialCatch = null;
+				DebugUtils.Log("Reeled in while Nibbling ........./!");
+				FishEscaped();
 			}
 			// Fish is Caught
 			else if (RodFloat.CanCatch)
 			{
+				DebugUtils.Log("Hooked Fish ........./Z >sSD");
+
 				RodFloat.Hooked();
 				potentialCatch.Fight();
 			}
 			// Pull Catch
 			else if (potentialCatch != null)
 			{
+				if (isCoolDown)
+					return;
+
+				DebugUtils.Log("Pull Fish ........./! >sSD");
+				startedReelInCoolDownTime = Time.time;
 				potentialCatch.ReelIn(-0.06f);
 			}
 			//Reel in float
@@ -115,13 +131,23 @@ namespace Assets.Scripts.Rods
 
 		public void FishEscaped()
 		{
-			RodFloat.Reset();
+			potentialCatch.Escape();
+			Reset();
 		}
 
 		public void CaughtFish(FishLogData fishLogData)
 		{
 			PlayerData.LogBook.TryAdd(fishLogData);
-			ViewController.UiController.CaughtFish(fishLogData.Type, onComplete: RodFloat.Reset);
+			ViewController.UiController.CaughtFish(fishLogData.Type, onComplete: Reset);
+		}
+
+		private void Reset()
+		{
+			DebugUtils.Log("reset Rod .........*/!*");
+
+			potentialCatch = null;
+			RodFloat.Reset();
+			Energy.Reset();
 		}
 
 		public void PullLeft() => Pull(PullState.Left);

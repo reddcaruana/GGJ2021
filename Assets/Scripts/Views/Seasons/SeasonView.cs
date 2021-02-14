@@ -8,37 +8,50 @@ namespace Assets.Scripts.Views.Seasons
 {
 	public class SeasonView : MonoBehaviour
 	{
-		private const float BOTTOM_NORMALISED = 0.77f;
+		private const float WATER_DEPTH_NORMALISED = 0.77f;
 
 		public Transform FishTank { get; private set; }
 		private SpriteRenderer waterSurfaceSpriteRend;
-		private SpriteRenderer bottomSpriteRend;
+		private SpriteRenderer waterDepthSpriteRend;
 
 		private void Awake()
 		{
 			waterSurfaceSpriteRend = transform.Find("SpriteWaterSurface").GetComponent<SpriteRenderer>();
-			bottomSpriteRend = waterSurfaceSpriteRend.transform.Find("SpriteBottom").GetComponent<SpriteRenderer>();
+			waterDepthSpriteRend = waterSurfaceSpriteRend.transform.Find("SpriteBottom").GetComponent<SpriteRenderer>();
 			FishTank = new GameObject("FishTank").transform;
 			FishTank.SetParent(transform);
 			FishTank.ResetTransforms();
 
 		}
 
-		public void Set(Vector2 tankSize, string typeStr, Vector3 baseWorldPosition)
+		public void Set(Vector2 viewSize, Vector3 tankCeenterLocalPos, string typeStr, Vector3 baseWorldPosition)
 		{
-			
-			waterSurfaceSpriteRend.drawMode = SpriteDrawMode.Sliced;
-			waterSurfaceSpriteRend.size = tankSize;
 
-			Vector2 bottomSize = tankSize;
-			bottomSize.x = tankSize.x * BOTTOM_NORMALISED;
-			bottomSpriteRend.drawMode = SpriteDrawMode.Sliced;
-			bottomSpriteRend.size = bottomSize;
+			waterSurfaceSpriteRend.drawMode = SpriteDrawMode.Sliced;
+			waterSurfaceSpriteRend.size = viewSize;
+
+			Vector2 waterDepthSize = viewSize;
+			waterDepthSize.x = viewSize.x * WATER_DEPTH_NORMALISED;
+			waterDepthSpriteRend.drawMode = SpriteDrawMode.Sliced;
+			waterDepthSpriteRend.size = waterDepthSize;
 
 			BuildTerrain(typeStr);
 
-			baseWorldPosition.y += (tankSize.y / 2);
+			PositionFromBase(baseWorldPosition);
+
+			FishTank.localPosition = tankCeenterLocalPos;
+		}
+
+		public void PositionFromBase(Vector3 baseWorldPosition)
+		{
+			baseWorldPosition.y += (waterSurfaceSpriteRend.size.y / 2f);
 			transform.position = baseWorldPosition;
+		}
+
+		public void PositionFromTop(Vector3 topWorldPosition)
+		{
+			topWorldPosition.y -= (waterSurfaceSpriteRend.size.y / 2f);
+			transform.position = topWorldPosition;
 		}
 
 		private void BuildTerrain(string typeStr)
@@ -107,9 +120,22 @@ namespace Assets.Scripts.Views.Seasons
 			return terrain;
 		}
 
-		private void CreateDebri()
-		{
+		public Vector3 GetTopWorldPosition() => GetTopWorldPosition(transform.position);
 
+		public Vector3 GetTopWorldPosition(Vector3 centerWorldPos)
+		{
+			Vector3 result = centerWorldPos;
+			result.y += (waterSurfaceSpriteRend.size.y / 2f);
+			return result;
+		}
+
+		public Vector3 GetBottomWorldPosition() => GetBottomWorldPosition(transform.position);
+
+		public Vector3 GetBottomWorldPosition(Vector3 centerWorldPos)
+		{
+			Vector3 result = centerWorldPos;
+			result.y -= (waterSurfaceSpriteRend.size.y / 2f);
+			return result;
 		}
 
 		public Vector3 BoundSize() => waterSurfaceSpriteRend.bounds.size;

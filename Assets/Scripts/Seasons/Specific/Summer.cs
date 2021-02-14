@@ -1,9 +1,9 @@
-﻿using UnityEngine;
-using Assets.Scripts.Paywalls;
-using Assets.Scripts.Constants;
+﻿using Assets.Scripts.Constants;
+using Assets.Scripts.Seasons.Paywalls;
 using Assets.Scripts.AquaticCreatures.Fish;
+using Assets.Scripts.Seasons.Paywalls.Specific;
 
-namespace Assets.Scripts.Seasons
+namespace Assets.Scripts.Seasons.Specific
 {
 	public class Summer : Season
 	{
@@ -24,9 +24,5 @@ namespace Assets.Scripts.Seasons
 		public override int MaxFish { get; } = 5;
 
 		public override PaywallBase PayWall { get; } = new SummerPaywall();
-
-		public Summer(Vector3 baseWorldPosition) : base(baseWorldPosition)
-		{
-		}
 	}
 }

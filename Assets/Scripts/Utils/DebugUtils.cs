@@ -14,6 +14,9 @@ namespace Assets.Scripts.Utils
 		public static void LogError(string msg) =>
 			Debug.LogError(msg);
 
+		public static void Assert(bool condition, string msg) =>
+			Debug.Assert(condition, msg);
+
 		[System.Diagnostics.Conditional("RDEBUG")]
 		public static void CreateDebugAreaView(float size, Color color, string name, int layer, Transform parent, Vector3 localPos = default)
 		{

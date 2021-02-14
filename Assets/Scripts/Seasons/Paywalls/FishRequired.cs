@@ -1,7 +1,7 @@
-﻿using Assets.Scripts.AquaticCreatures.Fish;
-using Assets.Scripts.Player;
+﻿using Assets.Scripts.Player;
+using Assets.Scripts.AquaticCreatures.Fish;
 
-namespace Assets.Scripts.Paywalls
+namespace Assets.Scripts.Seasons.Paywalls
 {
 	public class FishRequired
 	{

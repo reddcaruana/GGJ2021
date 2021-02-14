@@ -25,15 +25,19 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			MinWeight + ((MaxWeight - MinWeight) / 2f);
 	}
 
-	public readonly struct FishTypeData
+	[System.Serializable]
+	public struct FishTypeData
 	{
-		public readonly FishType Type;
-		public readonly string NiceName;
+		[SerializeField] FishType type;
+		[SerializeField] string niceName;
+
+		public FishType Type => type;
+		public string NiceName => niceName;
 
 		public FishTypeData(FishType type, string niceName)
 		{
-			Type = type;
-			NiceName = niceName;
+			this.type = type;
+			this.niceName = niceName;
 		}
 	}
 }

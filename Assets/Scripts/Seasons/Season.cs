@@ -1,20 +1,19 @@
 ﻿using UnityEngine;
+using Assets.Scripts.Utils;
 using Assets.Scripts.Constants;
-using Assets.Scripts.Framework;
 using System.Collections.Generic;
 using Assets.Scripts.Controllers;
 using Assets.Scripts.Views.Seasons;
-using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
+using Assets.Scripts.Seasons.Paywalls;
 using Assets.Scripts.AquaticCreatures;
 using Assets.Scripts.AquaticCreatures.Fish;
-using Assets.Scripts.Paywalls;
 
 namespace Assets.Scripts.Seasons
 {
 	public abstract class Season
 	{
-		private const float MARGIN_NORMALISED = 0.2f;
+		private const float MARGIN_NORMALISED = 0.1f;
 
 		public abstract SeasonAreaType Type { get; }
 		public abstract string NiceName { get; }
@@ -23,7 +22,6 @@ namespace Assets.Scripts.Seasons
 		public abstract int MaxFish { get; }
 		public abstract PaywallBase PayWall { get; }
 
-		private Vector3 baseWorldPosition;
 		public readonly Area2D FishTankArea;
 		protected FishController[] fishControllers;
 
@@ -31,14 +29,13 @@ namespace Assets.Scripts.Seasons
 		public bool HasView => view != null;
 		protected SeasonView view;
 
-		public Season(Vector3 baseWorldPosition)
+		public Season()
 		{
-			this.baseWorldPosition = baseWorldPosition;
 
 			float x = ViewController.Area.Width - (ViewController.Area.Width * MARGIN_NORMALISED);
 			float y = ViewController.Area.Height * NumberOfSegments;
-			Vector2 center = baseWorldPosition;
-			center.y += y / 2f;
+			Vector2 center = new Vector2();
+			center.y = PayWall == null ? 0 : -(ViewController.Area.Height / 2f);
 			FishTankArea = new Area2D(x, y, center);
 
 			fishControllers = new FishController[MaxFish];
@@ -48,37 +45,56 @@ namespace Assets.Scripts.Seasons
 				fishControllers[i].RegisterToCoolDownComplete(OnFishCoolDown);
 			}
 
-			PayWall.Set(NiceName);
+			PayWall?.Set(NiceName);
 		}
 
-		public void CreateView(Transform parent)
+		public void AssignView(SeasonView view, Vector3 baseWorldPosition)
 		{
-			view = MonoBehaviour.Instantiate(AssetLoader.ME.Loader<SeasonView>("Prefabs/Seasons/SeasonView"), parent);
-			view.Set(FishTankArea.Size, NiceName, baseWorldPosition);
-			PayWall.CreateView(view.transform);
-
+			this.view = view;
+			SetView(baseWorldPosition);
 		}
 
-		public Vector3 GetTopWorldPosition()
+		private void SetView(Vector3 baseWorldPosition)
 		{
-			Vector3 result = view.transform.position;
-			result.y += (FishTankArea.Height / 2f);
-			return result;
+			Vector2 visualSize = FishTankArea.Size;
+
+			if (PayWall != null)
+				visualSize.y += ViewController.Area.Height;
+
+			view.Set(visualSize, FishTankArea.Center, NiceName, baseWorldPosition);
+
+			if (PayWall != null)
+			{
+				Vector3 paywallPos = new Vector3();
+				paywallPos.y = (visualSize.y / 2f);
+				PayWall.CreateView(view.transform, paywallPos);
+			}
+
+			CreateFishViews();
+			SetAllFish();
+			DistriubuteFish();
 		}
 
-		public void CreateFishViews()
+		public void ReleaseViews()
+		{
+			view = null;
+			for (int i = 0; i < fishControllers.Length; i++)
+				fishControllers[i].ReleaseView();
+		}
+
+		private void CreateFishViews()
 		{
 			for (int i = 0; i < fishControllers.Length; i++)
 				fishControllers[i].CreateView(view.FishTank);
 		}
 
-		public void SetAllFish()
+		private void SetAllFish()
 		{
 			for (int i = 0; i < fishControllers.Length; i++)
 				SetFish(fishControllers[i]);
 		}
 
-		public void SetFish(FishController fishController)
+		private void SetFish(FishController fishController)
 		{
 			if (!fishController.IsReadyToSet)
 				return;
@@ -109,24 +125,25 @@ namespace Assets.Scripts.Seasons
 			fishController.Appear();
 		}
 
-		public bool ValidatePosition(Vector2 screenPosition, out Vector3 worldPos)
+		public bool ValidatePosition(Vector3 worldPos)
 		{
 			if (!HasView)
 			{
 				Debug.LogError("[Season] View must be created first");
-				worldPos = Statics.VECTOR2_ZERO;
 				return false;
 			}
 
-			worldPos = ViewController.MainCamera.ScreenToWorldPoint(screenPosition);
-			return MathUtils.IsInRectArea(FishTankArea, worldPos);
+			Area2D worldArea = new Area2D(FishTankArea.Width, FishTankArea.Height, view.FishTank.transform.position);
+			return MathUtils.IsInRectArea(worldArea, worldPos);
 		}
 
 		public IAquaticCreature OnCast(Vector3 worldPosition)
 		{
+			DebugUtils.Log("Searching for Fish  ~~~~ >sSD");
+
 			Vector3 localPosition;
 			if (HasView)
-				localPosition = view.transform.InverseTransformPoint(worldPosition);
+				localPosition = view.FishTank.transform.InverseTransformPoint(worldPosition);
 			else
 				localPosition = worldPosition;
 

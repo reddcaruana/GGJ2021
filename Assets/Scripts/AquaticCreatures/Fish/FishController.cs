@@ -3,9 +3,7 @@ using UnityEngine;
 using Assets.Scripts.Utils;
 using Assets.Scripts.Constants;
 using Assets.Scripts.Framework;
-using Assets.Scripts.Views.Fish;
 using Assets.Scripts.Controllers;
-using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
 
 namespace Assets.Scripts.AquaticCreatures.Fish
@@ -21,7 +19,7 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		private Vector3 spawnLocalPosition;
 
 		public bool HasView => view != null;
-		private FishView view; 
+		private FishPoolView view; 
 
 		protected override void SetInternal()
 		{
@@ -30,14 +28,26 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 
 			if (HasView)
 			{
-				view.Set(this);
-				view.SetStartAndEnd(proximityFear, proximityBite);
+				view.FishView.Set(this);
+				view.FishView.SetStartAndEnd(proximityFear, proximityBite);
 				DebugAreaView();
 			}
 		}
 
-		public void CreateView(Transform parent) =>
-			view = MonoBehaviour.Instantiate(AssetLoader.ME.Loader<FishView>("Prefabs/Fish/FishBase"), parent);
+		public void CreateView(Transform parent)
+		{
+			view = FishFactory.Spawn();
+			view.Spawn(parent);
+		}
+
+		public void ReleaseView()
+		{
+			if (!HasView)
+				return;
+
+			view.Despawn();
+			view = null;
+		}
 
 		public void RegisterToCoolDownComplete(Action<FishController> callback) =>
 			onCoolDownComplete += callback;
@@ -55,7 +65,7 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			spawnLocalPosition = localPosition;
 
 			if (HasView)
-				view.Reposition(localPosition, proximityFear, proximityBite);
+				view.FishView.Reposition(localPosition, proximityFear, proximityBite);
 		}
 
 		private static float CalculateProximityFear(float size)
@@ -90,13 +100,13 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		protected override void AppearInternal()
 		{
 			if (HasView)
-				view.Appear();
+				view.FishView.Appear();
 		}
 
 		protected override void EscapeInternal()
 		{
 			if (HasView)
-				view.Escape(null);
+				view.FishView.Escape(null);
 
 			Reset();
 		}
@@ -115,7 +125,7 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		protected override void CaughtInternal()
 		{
 			if (HasView)
-				view.Caught();
+				view.FishView.Caught();
 
 			Reset();
 		}
@@ -134,20 +144,29 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		public override void ApproachFloatInternal(Vector2 floatLocalPosition)
 		{
 			if (HasView)
-				view.ApprochFloat(floatLocalPosition);
+				view.FishView.ApprochFloat(floatLocalPosition);
 		}
 
 		public override void Fight()
 		{
 			if (HasView)
-				view.SetManualOverride(true);
+				view.FishView.SetManualOverride(true);
 			fightingModule = new FightingModule(this, GameController.ME.Rod);
 		}
 
-		public void ManualSwim(Vector3 newWorldPos)
+		public void ManualSwim(Vector3 newWorldPos) => ManualSwim(newWorldPos, newWorldPos);
+
+		public void ManualSwim(Vector3 newWorldPos, Vector3 lookWorldPos, bool isFaceAhead = true)
 		{
 			if (HasView)
-				view.ManualOverride(newWorldPos);
+			{
+				view.FishView.ManualOverride(newWorldPos, lookWorldPos, isFaceAhead);
+
+				if (Energy.IsResting)
+					view.FishView.PlayStaticAnimation();
+				else
+					view.FishView.PlayEscapeAimation();
+			}
 		}
 
 		public override void ReelIn(float speed)
@@ -158,7 +177,7 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			fightingModule.ReelIn(speed);
 		}
 
-		public Vector3 GetViewWorldPosition() => HasView ? view.GetFishWorldPosition() : Statics.VECTOR3_ZERO;
+		public Vector3 GetViewWorldPosition() => HasView ? view.FishView.GetFishWorldPosition() : Statics.VECTOR3_ZERO;
 
 		[System.Diagnostics.Conditional("RDEBUG")]
 		private void DebugAreaView()
@@ -168,10 +187,10 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 
 			Color color = Color.yellow;
 			color.a = 0.4f;
-			DebugUtils.CreateDebugAreaView(proximityFear, color, "Fear", -1, view.transform);
+			DebugUtils.CreateDebugAreaView(proximityFear, color, "Fear", -1, view.FishView.transform);
 			color = Color.green;
 			color.a = 0.4f;
-			DebugUtils.CreateDebugAreaView(proximityBite, color, "Bite", -2, view.transform);
+			DebugUtils.CreateDebugAreaView(proximityBite, color, "Bite", -2, view.FishView.transform);
 		}
 
 		[System.Diagnostics.Conditional("RDEBUG")]
@@ -180,8 +199,8 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			if (!HasView)
 				return;
 
-			MonoBehaviour.Destroy(view.transform.Find("Fear").gameObject);
-			MonoBehaviour.Destroy(view.transform.Find("Bite").gameObject);
+			MonoBehaviour.Destroy(view.FishView.transform.Find("Fear").gameObject);
+			MonoBehaviour.Destroy(view.FishView.transform.Find("Bite").gameObject);
 		}
 	}
 }
