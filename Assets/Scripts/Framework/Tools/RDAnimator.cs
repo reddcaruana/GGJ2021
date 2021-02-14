@@ -6,24 +6,33 @@ using Assets.Scripts.Framework.Utils;
 namespace Assets.Scripts.Framework.Tools
 {
 	public enum AnimationState { Play, Pause, Stop}
+	public enum LoopType { None, Normal, PingPong}
 	public class RDAnimator
 	{
-		public float FPS { get; set; }
-		public bool IsLoop { get; set; }
+		public int Frames { get; set; }
+		public float FPS { get; set; } = 30f;
+		public LoopType Loop { get; set; } = LoopType.None;
 		public AnimationState State { get; private set; } = AnimationState.Stop;
+		public int CurrentFrame { get; private set; } = 0;
 
-		private Action<int> onFrameUpdate;
-		private int frames;
-		private int currentFrame = 0;
+		private readonly Action<int> onFrameUpdate;
+		private int direction = 1;
+
+		public RDAnimator(Action<int> onFrameUpdate) : this(0, onFrameUpdate)
+		{
+		}
 
 		public RDAnimator(int frames, Action<int> onFrameUpdate)
 		{
-			this.frames = frames;
+			Frames = frames;
 			this.onFrameUpdate = onFrameUpdate;
 		}
 
 		public void Play()
 		{
+			if (State == AnimationState.Play)
+				return;
+
 			State = AnimationState.Play;
 			CoroutineRunner.RunCoroutine(PlaybackCoroutine());
 		}
@@ -36,11 +45,13 @@ namespace Assets.Scripts.Framework.Tools
 		public void Stop()
 		{
 			State = AnimationState.Stop;
-			currentFrame = 0;
+			CurrentFrame = 0;
+			direction = 1;
 		}
 
 		private IEnumerator PlaybackCoroutine()
 		{
+			int tempFrame;
 			float startTime;
 			while(State == AnimationState.Play)
 			{
@@ -53,12 +64,22 @@ namespace Assets.Scripts.Framework.Tools
 					yield return null;
 				}
 
-				onFrameUpdate(currentFrame++);
+				onFrameUpdate(CurrentFrame);
 
-				currentFrame = MathUtils.LoopIndex(currentFrame, frames);
-
-				if (currentFrame == 0 && !IsLoop)
+				if (CurrentFrame == Frames - 1 && Loop == LoopType.None)
+				{
 					Stop();
+					yield break;
+				}
+
+				tempFrame = CurrentFrame + direction;
+				if (Loop == LoopType.PingPong && (tempFrame == Frames || tempFrame < 0))
+				{
+					direction *= -1;
+					tempFrame = CurrentFrame + direction;
+				}
+
+				CurrentFrame = MathUtils.LoopIndex(tempFrame, Frames);
 			}
 		}
 	}

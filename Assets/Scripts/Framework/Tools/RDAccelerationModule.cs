@@ -7,25 +7,47 @@ namespace Assets.Scripts.Framework.Tools
 {
 	public class RDAccelerationModule
 	{
+		private const float SPEED_VECTOR_TRASH_HOLD = 0.0001f;
+
+		public bool HasBounds => checkPosition != null;
+		public Vector2 DirectionVector { get; private set; } = new Vector2(0f, 1f);
+		public bool IsMoving => speedVector != Statics.VECTOR2_ZERO;
+		public bool KillSpeedVectorOnOutOfBounds { get; set; } = false;
+		private bool isActive;
+		public bool IsActive 
+		{
+			get => isActive;
+			set
+			{
+				isActive = value;
+
+				if (value && coroutine == null)
+					coroutine = CoroutineRunner.RunCoroutine(UpdateCoroutine());
+
+				else if (!value && coroutine != null)
+				{
+					CoroutineRunner.HaltCoroutine(coroutine);
+					coroutine = null;
+				}
+			} 
+		}
+
 		private Action<Vector3> moveUpdate;
 		private Func<Vector3> getWorldPosition;
 		private Func<Vector3, Vector3> checkPosition;
-
-		public bool IsActive { get; set; } = true;
-		public bool HasBounds => checkPosition != null;
-
+		
 		private float speed;
 		private float drag = 0.99f;
-		private Vector2 directionVector = new Vector2(0f, 1f);
 		private Vector2 speedVector = new Vector2();
 
 		private Coroutine coroutine;
+
+
 
 		public RDAccelerationModule(Action<Vector3> moveUpdate, Func<Vector3> getWorldPosition)
 		{
 			this.moveUpdate = moveUpdate;
 			this.getWorldPosition = getWorldPosition;
-			coroutine = CoroutineRunner.RunCoroutine(UpdateCoroutine());
 		}
 
 		public void SetBounds(Func<Vector3, Vector3> checkPosition) =>
@@ -37,27 +59,42 @@ namespace Assets.Scripts.Framework.Tools
 			SetDirection(result);
 		}
 
-		public void SetDirection(Vector3 directionVector) => this.directionVector = directionVector;
+		public void SetDirection(Vector3 directionVector) => this.DirectionVector = directionVector;
 
-		public void SetSpeed(float speed) 
-		{
-			if (!IsActive)
-				return;
+		public void SetSpeed(float speed) => this.speed = speed;
 
-			this.speed = speed; 
-		}
+		public void SetDrag(float normalized) => drag = normalized;
 
 		private IEnumerator UpdateCoroutine()
 		{
-			while (true)
+			while (IsActive)
 			{
-				speedVector += directionVector * speed;
+				speedVector += DirectionVector * speed;
 				speedVector *= drag;
-				Vector2 pos = getWorldPosition();
-				pos += speedVector;
 
-				if (HasBounds)
-					pos = checkPosition(pos);
+				TrashHold();
+
+				Vector2 pos = getWorldPosition();
+
+				if (IsMoving)
+				{
+					pos += speedVector;
+
+					if (HasBounds)
+					{
+						Vector2 boundsPos = checkPosition(pos);
+
+						if (KillSpeedVectorOnOutOfBounds)
+						{
+							if (pos.x != boundsPos.x)
+								speedVector.x = 0;
+							if (pos.y != boundsPos.y)
+								speedVector.y = 0;
+						}
+
+						pos = boundsPos;
+					}
+				}
 
 				moveUpdate(pos);
 
@@ -66,14 +103,13 @@ namespace Assets.Scripts.Framework.Tools
 			}
 		}
 
-		public void ForceStop()
-		{
-			IsActive = false;
-			if (coroutine != null)
-			{
-				CoroutineRunner.HaltCoroutine(coroutine);
-				coroutine = null;
-			}
+		private void TrashHold()
+		{	
+			speedVector[0] = Check(speedVector[0]) ? 0 : speedVector[0];
+			speedVector[1] = Check(speedVector[1]) ? 0 : speedVector[1];
+
+			bool Check(float value) => 
+				MathUtils.InRangeFloat(value, -SPEED_VECTOR_TRASH_HOLD, SPEED_VECTOR_TRASH_HOLD);
 		}
 	}
 }

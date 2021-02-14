@@ -16,6 +16,8 @@ namespace Assets.Scripts.Framework.Ui
 		public Vector2 showPos;
 		public Vector2 hidePos;
 
+		public bool disableOnHide;
+
 		public State CurrentState { get; private set; }
 		public bool IsInMotion => CurrentState == State.HideTransition || CurrentState == State.ShowTransition;
 
@@ -46,6 +48,9 @@ namespace Assets.Scripts.Framework.Ui
 
 			if (CurrentState == oppositeTransitionState)
 				StopCurrentTransition();
+			
+			else if (disableOnHide && targetState == State.Visible)
+				rectTransform.gameObject.SetActive(true);
 
 			CurrentState = targetTransitionState;
 			OnStartTransition();
@@ -80,6 +85,13 @@ namespace Assets.Scripts.Framework.Ui
 		protected virtual void OnDoneTransition(State newState, Action onComplete)
 		{
 			CurrentState = newState;
+
+			if (disableOnHide && CurrentState == State.Hidden)
+				rectTransform.gameObject.SetActive(false);
+
+			else if (disableOnHide && CurrentState == State.Visible)
+				rectTransform.gameObject.SetActive(true);
+
 			onComplete?.Invoke();
 		}
 
