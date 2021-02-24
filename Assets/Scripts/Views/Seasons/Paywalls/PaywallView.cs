@@ -59,7 +59,7 @@ namespace Assets.Scripts.Views.Seasons.Paywalls
 			mainSpriteFinal = AssetLoader.ME.Loader<Sprite>($"Sprites/Paywall/{seasonStr}/Paywall{seasonStr}Final");
 
 			mainSprite.sprite = mainSpriteFrames[0];
-			transform.localScale = Statics.VECTOR3_ONE * (ViewController.Area.Width / mainSprite.size.x);
+			transform.localScale = Statics.VECTOR3_ONE * (ViewController.Area.Width / mainSprite.bounds.size.x);
 		}
 
 		public void PlayAnimation(bool value)

@@ -45,14 +45,6 @@ namespace Assets.Scripts.Input
                     ""interactions"": """"
                 },
                 {
-                    ""name"": ""Hold"",
-                    ""type"": ""Button"",
-                    ""id"": ""ca40613d-a8d1-4b54-a383-d3dea8f1977c"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """"
-                },
-                {
                     ""name"": ""Gyro"",
                     ""type"": ""Value"",
                     ""id"": ""994eefc1-eadb-4044-b102-b93427f897c0"",
@@ -119,12 +111,12 @@ namespace Assets.Scripts.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""79a49697-16ce-41ec-ba25-179e24b1e652"",
-                    ""path"": ""<Touchscreen>/primaryTouch/press"",
+                    ""id"": ""c937e673-c26a-4a60-981b-f9f99da29efb"",
+                    ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": ""Hold"",
                     ""processors"": """",
-                    ""groups"": ""Android"",
-                    ""action"": ""Hold"",
+                    ""groups"": ""PC"",
+                    ""action"": ""PrimaryContact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -182,7 +174,6 @@ namespace Assets.Scripts.Input
             m_Player_Click = m_Player.FindAction("Click", throwIfNotFound: true);
             m_Player_Position = m_Player.FindAction("Position", throwIfNotFound: true);
             m_Player_PrimaryContact = m_Player.FindAction("PrimaryContact", throwIfNotFound: true);
-            m_Player_Hold = m_Player.FindAction("Hold", throwIfNotFound: true);
             m_Player_Gyro = m_Player.FindAction("Gyro", throwIfNotFound: true);
         }
 
@@ -236,7 +227,6 @@ namespace Assets.Scripts.Input
         private readonly InputAction m_Player_Click;
         private readonly InputAction m_Player_Position;
         private readonly InputAction m_Player_PrimaryContact;
-        private readonly InputAction m_Player_Hold;
         private readonly InputAction m_Player_Gyro;
         public struct PlayerActions
         {
@@ -245,7 +235,6 @@ namespace Assets.Scripts.Input
             public InputAction @Click => m_Wrapper.m_Player_Click;
             public InputAction @Position => m_Wrapper.m_Player_Position;
             public InputAction @PrimaryContact => m_Wrapper.m_Player_PrimaryContact;
-            public InputAction @Hold => m_Wrapper.m_Player_Hold;
             public InputAction @Gyro => m_Wrapper.m_Player_Gyro;
             public InputActionMap Get() { return m_Wrapper.m_Player; }
             public void Enable() { Get().Enable(); }
@@ -265,9 +254,6 @@ namespace Assets.Scripts.Input
                     @PrimaryContact.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPrimaryContact;
                     @PrimaryContact.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPrimaryContact;
                     @PrimaryContact.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnPrimaryContact;
-                    @Hold.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnHold;
-                    @Hold.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnHold;
-                    @Hold.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnHold;
                     @Gyro.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnGyro;
                     @Gyro.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnGyro;
                     @Gyro.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnGyro;
@@ -284,9 +270,6 @@ namespace Assets.Scripts.Input
                     @PrimaryContact.started += instance.OnPrimaryContact;
                     @PrimaryContact.performed += instance.OnPrimaryContact;
                     @PrimaryContact.canceled += instance.OnPrimaryContact;
-                    @Hold.started += instance.OnHold;
-                    @Hold.performed += instance.OnHold;
-                    @Hold.canceled += instance.OnHold;
                     @Gyro.started += instance.OnGyro;
                     @Gyro.performed += instance.OnGyro;
                     @Gyro.canceled += instance.OnGyro;
@@ -317,7 +300,6 @@ namespace Assets.Scripts.Input
             void OnClick(InputAction.CallbackContext context);
             void OnPosition(InputAction.CallbackContext context);
             void OnPrimaryContact(InputAction.CallbackContext context);
-            void OnHold(InputAction.CallbackContext context);
             void OnGyro(InputAction.CallbackContext context);
         }
     }

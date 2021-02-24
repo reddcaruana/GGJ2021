@@ -44,13 +44,13 @@ namespace Assets.Scripts.Views.Seasons
 
 		public void PositionFromBase(Vector3 baseWorldPosition)
 		{
-			baseWorldPosition.y += (waterSurfaceSpriteRend.size.y / 2f);
+			baseWorldPosition.y += (waterSurfaceSpriteRend.bounds.size.y / 2f);
 			transform.position = baseWorldPosition;
 		}
 
 		public void PositionFromTop(Vector3 topWorldPosition)
 		{
-			topWorldPosition.y -= (waterSurfaceSpriteRend.size.y / 2f);
+			topWorldPosition.y -= (waterSurfaceSpriteRend.bounds.size.y / 2f);
 			transform.position = topWorldPosition;
 		}
 
@@ -58,7 +58,7 @@ namespace Assets.Scripts.Views.Seasons
 		{
 			SpriteRenderer terrainSidePrefab = CreateTerrainSidePrefab(typeStr);
 
-			int totalNum = Mathf.FloorToInt(waterSurfaceSpriteRend.size.y / terrainSidePrefab.bounds.size.y);
+			int totalNum = Mathf.FloorToInt(waterSurfaceSpriteRend.bounds.size.y / terrainSidePrefab.bounds.size.y);
 			int doubleTotalNum = totalNum * 2;
 
 			float initY = terrainSidePrefab.transform.localPosition.y;
@@ -102,7 +102,7 @@ namespace Assets.Scripts.Views.Seasons
 			terrain.transform.SetParent(waterSurfaceSpriteRend.transform);
 			terrain.transform.ResetTransforms();
 
-			float x = (ViewController.Area.Width - waterSurfaceSpriteRend.size.x) / 2f;
+			float x = (ViewController.Area.Width - waterSurfaceSpriteRend.bounds.size.x) / 2f;
 			float s = x / terrain.bounds.size.x;
 			Vector3 vs = Statics.VECTOR3_ONE * s;
 			terrain.transform.localScale = vs;
@@ -113,8 +113,8 @@ namespace Assets.Scripts.Views.Seasons
 
 			terrain.transform.localPosition = new Vector3()
 			{
-				x = (ViewController.Area.Width / 2f) - (terrain.bounds.size.x / 2f),
-				y = (-waterSurfaceSpriteRend.size.y / 2f) + (terrain.bounds.size.y / 2f)
+				x = ViewController.Area.HalfWidth - (terrain.bounds.size.x / 2f),
+				y = (-waterSurfaceSpriteRend.bounds.size.y / 2f) + (terrain.bounds.size.y / 2f)
 			};
 
 			return terrain;
@@ -125,7 +125,7 @@ namespace Assets.Scripts.Views.Seasons
 		public Vector3 GetTopWorldPosition(Vector3 centerWorldPos)
 		{
 			Vector3 result = centerWorldPos;
-			result.y += (waterSurfaceSpriteRend.size.y / 2f);
+			result.y += (waterSurfaceSpriteRend.bounds.size.y / 2f);
 			return result;
 		}
 

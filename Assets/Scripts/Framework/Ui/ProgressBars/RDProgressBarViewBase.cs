@@ -1,7 +1,7 @@
 ﻿using UnityEngine.UI;
 using Assets.Scripts.Framework.Tools;
 
-namespace Assets.Scripts.Framework.Ui
+namespace Assets.Scripts.Framework.Ui.ProgressBars
 {
 	public abstract class RDProgressBarViewBase : RDUiObject, IProgressBarView
 	{

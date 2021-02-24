@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using Assets.Scripts.Rods;
 using Assets.Scripts.Framework;
 using Assets.Scripts.Framework.Tools;
@@ -6,14 +7,12 @@ using Assets.Scripts.Framework.Input;
 
 namespace Assets.Scripts.Controllers
 {
-	/* **** NOTES ****
-	 * 
-	 * - Unable to catch fish on Season 2 
-	 */
-
 	public class GameController : RDMonobehaviourSingleton<GameController>
 	{
 		public RodBase Rod { get; private set; }
+		public bool IsDragging { get; private set; }
+
+		private Action onUpdate;
 
 		protected override void Awake()
 		{
@@ -21,19 +20,34 @@ namespace Assets.Scripts.Controllers
 			MakePersistent();
 
 			GameFactory.Start();
-			ViewController.Init();
 		}
 
 		private void Start()
 		{
+			ViewController.Init();
+
 			Rod = new BasicRod();
 			Rod.CreateView(ViewController.MainCamera.transform.Find("Boat"));
 			Rod.RegisterToOnCastComnplete(ViewController.OnCast);
 
 			InputManager.onClickPosition += OnClick;
-			InputManager.onSwipeDetaction += OnSwipe;
-			InputManager.onHoldDetaction += OnHold;
+
+			InputManager.onDragStart += OnDragStart;
+			InputManager.onDrag += OnDrag;
+			InputManager.onDragEnd += OnDragEnd;
 		}
+
+		private void Update()
+		{
+			onUpdate?.Invoke();
+			InputManager.Gyro();
+
+			if (InputManager.IsDragging)
+				InputManager.DragUpdate();
+		}
+
+		public void RegisterToUpdate(Action callback) => onUpdate += callback;
+		public void UnregisterToUpdate(Action callback) => onUpdate -= callback;
 
 		private void OnClick(Vector3 worldPosition)
 		{
@@ -41,31 +55,38 @@ namespace Assets.Scripts.Controllers
 			Rod.TryCast(worldPosition);
 		}
 
-		private void OnHold(bool holding)
+		private void OnDragStart(DragData data)
 		{
-			Debug.Log("Hold: " + holding);
-			//ViewController.ApplBrakes(holding);
+			IsDragging = true;
+			ViewController.FollowStart();
 		}
 
-		private void OnSwipe(SwipeData data)
+
+		private void OnDrag(DragData data)
 		{
+			if (data.FilteredDirection().y == 0)
+				return;
+
+			ViewController.FollowUpdate(data.AxisDistance.y * -1);
+		}
+
+		private void OnDragEnd(SwipeData data)
+		{
+			IsDragging = false;
+			ViewController.FollowStop();
+
 			Vector3 filteredDirection = data.FilteredDirection();
 
 			ShowHideLogBook(filteredDirection);
-			TryMoveBoat(filteredDirection);
+			TryAccelerateBoat(filteredDirection, data);
 		}
 
-		private bool TryMoveBoat(Vector3 filteredDirection)
+		private bool TryAccelerateBoat(Vector3 filteredDirection, SwipeData data)
 		{
-
 			if (filteredDirection.y == 0)
 				return false;
 
-			if (filteredDirection.y > 0)
-				ViewController.MoveBack();
-			else
-				ViewController.MoveFoward();
-
+			ViewController.Accelerate(((data.Distance / data.Time) * filteredDirection.y) * 0.01f);
 			return true;
 		}
 
@@ -75,11 +96,6 @@ namespace Assets.Scripts.Controllers
 				return;
 
 			ViewController.UiController.ShowHideLogBook(filteredDirection.x < 0);
-		}
-
-		public void Update()
-		{
-			InputManager.Gyro();
 		}
 	}
 }

@@ -30,14 +30,6 @@
                     "interactions": ""
                 },
                 {
-                    "name": "Hold",
-                    "type": "Button",
-                    "id": "ca40613d-a8d1-4b54-a383-d3dea8f1977c",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": ""
-                },
-                {
                     "name": "Gyro",
                     "type": "Value",
                     "id": "994eefc1-eadb-4044-b102-b93427f897c0",
@@ -104,12 +96,12 @@
                 },
                 {
                     "name": "",
-                    "id": "79a49697-16ce-41ec-ba25-179e24b1e652",
-                    "path": "<Touchscreen>/primaryTouch/press",
+                    "id": "c937e673-c26a-4a60-981b-f9f99da29efb",
+                    "path": "<Mouse>/leftButton",
                     "interactions": "Hold",
                     "processors": "",
-                    "groups": "Android",
-                    "action": "Hold",
+                    "groups": "PC",
+                    "action": "PrimaryContact",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

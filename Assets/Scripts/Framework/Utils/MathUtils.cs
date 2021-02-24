@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Assets.Scripts.Framework.Utils
 {
@@ -16,6 +17,9 @@ namespace Assets.Scripts.Framework.Utils
 			float distance = Vector2.Distance(center, point);
 			return distance <= radius;
 		}
+
+		public static bool AreCirclesOverlaping(Vector2 center1, float radius1, Vector2 center2, float radius2) =>
+			Vector2.Distance(center1, center2) < radius1 + radius2;
 
 		public static bool IsInRectArea(Area2D area, Vector2 position) => 
 			IsInRectArea(area.TopLeftCorner, area.BottomRightCorner, position);
@@ -130,14 +134,18 @@ namespace Assets.Scripts.Framework.Utils
 		public readonly Vector2 BottomRightCorner;
 		public readonly Vector2 Center;
 		public readonly float Width;
+		public readonly float HalfWidth;
 		public readonly float Height;
+		public readonly float HalfHeight;
 		public float Area => Width * Height;
 		public Vector2 Size => new Vector2(Width, Height);
 
 		public Area2D(float width, float height, Vector2 center)
 		{
 			Width = width;
+			HalfWidth = width / 2f;
 			Height = height;
+			HalfHeight = height / 2f;
 			Center = center;
 			TopLeftCorner = center;
 			TopLeftCorner.x -= Width / 2f;

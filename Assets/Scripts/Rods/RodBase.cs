@@ -15,13 +15,17 @@ namespace Assets.Scripts.Rods
 {
 	public abstract class RodBase
 	{
+		public abstract Vector3 LineStartLocalPos { get; }
 		public abstract string NiceName { get; }
+
 		private readonly RodTiltHandler RodTiltHandler = RodTiltFactory.Create();
+		private readonly RodLine RodLine = new RodLine();
 		private readonly RodFloat RodFloat = new RodFloat();
 		public readonly RodNet Net;
 		public readonly Energy Energy;
 		public PullState PullState = PullState.None;
 		public bool IsCasted => RodFloat.IsCasted;
+		public bool IsBusy => IsCasted && (RodFloat.IsNibbling || RodFloat.CanCatch || potentialCatch != null);
 
 		protected readonly float ReelInCoolDownTime = 0.4f;
 		private float startedReelInCoolDownTime = 1f;
@@ -45,10 +49,14 @@ namespace Assets.Scripts.Rods
 		public void CreateView(Transform parent)
 		{
 			view = MonoBehaviour.Instantiate(AssetLoader.ME.Loader<RodBaseView>("Prefabs/Rods/RodBaseView"), parent);
-			view.Set(NiceName);
+			view.Set(NiceName, LineStartLocalPos);
 			view.SetPosition(Net.CenterWorldPos);
+			RodLine.CreateView(view.transform);
 			RodFloat.CreateView(view.transform);
 			RodTiltHandler.Start();
+
+			GameController.ME.RegisterToUpdate(OnGameControllerUpdate);
+
 			DebugUtils.CreateDebugAreaView(Net.Radius, Color.red, "Net", -5, view.transform);
 		}
 
@@ -129,25 +137,45 @@ namespace Assets.Scripts.Rods
 			}
 		}
 
-		public void FishEscaped()
+		public void LineSnap()
+		{
+			RodTiltHandler.Stop();
+			RodLine.LineSnap(OnSnapComplete);
+
+			void OnSnapComplete()
+			{
+				RodTiltHandler.Start();
+				FishEscaped(isInstant: true);
+			}
+		}
+
+		public void FishEscaped() => FishEscaped(isInstant: false);
+
+		public void FishEscaped(bool isInstant)
 		{
 			potentialCatch.Escape();
-			Reset();
+			Reset(isInstant);
 		}
 
 		public void CaughtFish(FishLogData fishLogData)
 		{
 			PlayerData.LogBook.TryAdd(fishLogData);
-			ViewController.UiController.CaughtFish(fishLogData.Type, onComplete: Reset);
+			ViewController.UiController.CaughtFish(fishLogData.Type);
+			Reset(false);
 		}
 
-		private void Reset()
+		private void Reset(bool isInstant)
 		{
 			DebugUtils.Log("reset Rod .........*/!*");
 
 			potentialCatch = null;
-			RodFloat.Reset();
 			Energy.Reset();
+			RodLine.Reset();
+
+			if (isInstant)
+				RodFloat.InstantReset();
+			else
+				RodFloat.Reset();
 		}
 
 		public void PullLeft() => Pull(PullState.Left);
@@ -172,6 +200,16 @@ namespace Assets.Scripts.Rods
 				}
 				view.Rotate(angle, 0.1f, flip: state == PullState.Right);
 			}
+		}
+
+		private void OnGameControllerUpdate()
+		{
+			if (!HasVeiw)
+				return;
+
+			Vector3 endPosittion = potentialCatch == null || RodFloat.IsNibbling ? RodFloat.GetViewWorldPosition() : potentialCatch.GetViewWorldPosition();
+			RodLine.PositionUpdate(view.GetLineStartWorldPosition(), endPosittion);
+			RodLine.ProgressBarUpdate(1 - (Energy.Value / Energy.Max));
 		}
 	}
 }

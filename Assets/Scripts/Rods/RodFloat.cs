@@ -128,7 +128,11 @@ namespace Assets.Scripts.Rods
 			onEscape();
 		}
 
-		public void Reset()
+		public void Reset() => ResetInternal(0.5f);
+
+		public void InstantReset() => ResetInternal(0);
+
+		private void ResetInternal(float duration)
 		{
 			if (IsReseting)
 				return;
@@ -138,7 +142,7 @@ namespace Assets.Scripts.Rods
 			IsReseting = true;
 
 			if (HasView)
-				view.Reset(startWorldPos, 0.5f, Continue);
+				view.Reset(startWorldPos, duration, Continue);
 			else
 				Continue();
 
@@ -151,5 +155,7 @@ namespace Assets.Scripts.Rods
 			}
 
 		}
+
+		public Vector3 GetViewWorldPosition() => view.transform.position;
 	}
 }

@@ -16,6 +16,7 @@ namespace Assets.Scripts.Framework.Tools
 		public int CurrentFrame { get; private set; } = 0;
 
 		private readonly Action<int> onFrameUpdate;
+		private Action onNonLoopAnimationComplete;
 		private int direction = 1;
 
 		public RDAnimator(Action<int> onFrameUpdate) : this(0, onFrameUpdate)
@@ -27,6 +28,9 @@ namespace Assets.Scripts.Framework.Tools
 			Frames = frames;
 			this.onFrameUpdate = onFrameUpdate;
 		}
+
+		public void RegisterToNoLoopAnimationCompletion(Action callback) => onNonLoopAnimationComplete += callback;
+		public void UnregisterToNoLoopAnimationCompletion(Action callback) => onNonLoopAnimationComplete -= callback;
 
 		public void Play()
 		{
@@ -69,6 +73,7 @@ namespace Assets.Scripts.Framework.Tools
 				if (CurrentFrame == Frames - 1 && Loop == LoopType.None)
 				{
 					Stop();
+					onNonLoopAnimationComplete?.Invoke();
 					yield break;
 				}
 

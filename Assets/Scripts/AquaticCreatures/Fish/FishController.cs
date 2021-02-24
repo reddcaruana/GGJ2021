@@ -111,12 +111,18 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			Reset();
 		}
 
-		private void CoolDown()
+		private void SpawnCoolDown()
 		{
 			CoroutineRunner.Wait(COOL_DOWN, OnCoolDownComplete);
 
 			void OnCoolDownComplete()
 			{
+				if (IsBaotFear())
+				{
+					SpawnCoolDown();
+					return;
+				}
+
 				IsReadyToSet = true;
 				onCoolDownComplete?.Invoke(this);
 			}
@@ -132,13 +138,15 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 
 		private void Reset()
 		{
+			isAvailable = false;
+
 			if (HasView)
 				CleanDebugAreaView();
 
 			if (fightingModule != null)
 				fightingModule = null;
 
-			CoolDown();
+			SpawnCoolDown();
 		}
 
 		public override void ApproachFloatInternal(Vector2 floatLocalPosition)
@@ -177,7 +185,16 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			fightingModule.ReelIn(speed);
 		}
 
-		public Vector3 GetViewWorldPosition() => HasView ? view.FishView.GetFishWorldPosition() : Statics.VECTOR3_ZERO;
+		public override Vector3 GetViewWorldPosition() => HasView ? view.FishView.GetFishWorldPosition() : Statics.VECTOR3_ZERO;
+
+		public void FearOfBoats()
+		{
+			if (IsBaotFear())
+				Escape();
+		}
+
+		private bool IsBaotFear() =>
+			MathUtils.AreCirclesOverlaping(ViewController.ScreenBottom, SeasonScrollController.FEAR_OF_THE_BOAT, view.FishView.transform.position, proximityBite);
 
 		[System.Diagnostics.Conditional("RDEBUG")]
 		private void DebugAreaView()

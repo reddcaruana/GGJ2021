@@ -12,6 +12,7 @@ namespace Assets.Scripts.AquaticCreatures
 		bool CanCatch { get; }
 		void Set(FishData data);
 		Vector3 GetLocalSpawnPosition();
+		Vector3 GetViewWorldPosition();
 		IAquaticCreature OnCast(Vector3 floatPosition);
 		void Appear();
 		void Escape();

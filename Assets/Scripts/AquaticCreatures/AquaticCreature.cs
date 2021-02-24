@@ -75,5 +75,7 @@ namespace Assets.Scripts.AquaticCreatures
 		}
 
 		protected abstract void CaughtInternal();
+
+		public abstract Vector3 GetViewWorldPosition();
 	}
 }

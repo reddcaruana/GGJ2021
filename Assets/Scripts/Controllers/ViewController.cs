@@ -15,6 +15,8 @@ namespace Assets.Scripts.Controllers
 	{
 		public static Camera MainCamera = Camera.main;
 		public static readonly Area2D Area;
+		public static readonly Vector2 ScreenBottom;
+
 
 		public static readonly UiController UiController = new UiController();
 
@@ -30,6 +32,7 @@ namespace Assets.Scripts.Controllers
 			float height = MainCamera.orthographicSize * 2.0f;
 			float width = height * Screen.width / Screen.height;
 			Area = new Area2D(width, height, Statics.VECTOR2_ZERO);
+			ScreenBottom = new Vector2(0, -Area.HalfHeight);
 		}
 
 		public static IAquaticCreature OnCast(Vector3 worldPos)
@@ -64,8 +67,8 @@ namespace Assets.Scripts.Controllers
 		public static Season PeekPrevSeason() => PeekSeason(-1);
 		private static Season PeekSeason(int direction) => seasons[MathUtils.LoopIndex(seasonIdex + direction, seasons.Length)];
 
-		private static void NextSeason() => MoveSeason(1);
-		private static void PrevSeason() => MoveSeason(-1);
+		public static void NextSeason() => MoveSeason(1);
+		public static void PrevSeason() => MoveSeason(-1);
 		private static void MoveSeason(int direction) => seasonIdex = MathUtils.LoopIndex(seasonIdex + direction, seasons.Length);
 
 		public static bool CanCast(Vector3 worldPosition)
@@ -98,13 +101,28 @@ namespace Assets.Scripts.Controllers
 			return false;
 		}
 
-		public static bool CanMove()
+		public static bool TryResetRodAndMove()
 		{
-			return !UiController.IsMainMenu && !GameController.ME.Rod.IsCasted;
+			bool result = CanMove();
+			if (result)
+				GameController.ME.Rod.ReelIn();
+			return result;
 		}
 
-		public static void MoveFoward() => seasonScrollController.Foward();
-		public static void MoveBack() => seasonScrollController.Back();
-		public static void ApplBrakes(bool value) => seasonScrollController.ApplyBrakes(value);
+		public static bool CanMove()
+		{
+			if (UiController.IsMainMenu)
+				return false;
+
+			if (!GameController.ME.Rod.IsBusy)
+				return true;
+
+			return false;
+		}
+
+		public static void FollowStart() => seasonScrollController.FolllowStart();
+		public static void FollowUpdate(float followDistrance) => seasonScrollController.FollowUpdate(followDistrance);
+		public static void FollowStop() => seasonScrollController.FollowStop();
+		public static void Accelerate(float speed) => seasonScrollController.SetSpeed(speed);
 	}
 }

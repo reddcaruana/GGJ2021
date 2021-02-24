@@ -12,6 +12,7 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 {
 	public class FightingModule
 	{
+		private static VTrail vTrail;
 		private readonly Vector3[] directionVectors = new Vector3[]
 		{
 			new Vector3(-0.5f, 0.5f, 0),
@@ -33,6 +34,12 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			realInTarget = new Vector2(0f, ViewController.Area.BottomRightCorner.y);
 			area = new Area2D(ViewController.CurrentSeason.FishTankArea.Width, ViewController.Area.Height, ViewController.MainCamera.transform.position);
 
+			if (vTrail == null)
+			{
+				vTrail = new VTrail();
+				vTrail.Init();
+			}
+			
 			accelerationModule = new RDAccelerationModule(OnMove, fishController.GetViewWorldPosition);
 			accelerationModule.IsActive = true;
 
@@ -48,14 +55,19 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 
 			float startRestingTime = 0;
 
+			vTrail.Size(fishController.Size);
+			vTrail.Show();
+
 			while (true)
 			{
 				DebugViewUpdate();
 				DebugInfo(fishPullState);
 
+				ShowHideVTrailOnRest();
 
 				if (!fishController.Energy.IsResting)
 				{
+
 					if (Time.time - redirectStartTime >= redirectTime)
 					{
 						redirectTime = Random.Range(4, 6);
@@ -83,7 +95,7 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 				if (rod.Energy.Value == 0)
 				{
 					DebugUtils.Log("Escaped due to line snap.");
-					rod.FishEscaped();
+					rod.LineSnap();
 					break;
 				}
 
@@ -110,6 +122,7 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 				yield return null;
 			}
 
+			vTrail.Hide();
 			accelerationModule.IsActive = false;
 			HideDebug();
 		}
@@ -120,6 +133,7 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		{
 			Vector3 lookAhead = (directionVectors[directionIndex] * FishView.AHEAD) + newPos;
 			fishController.ManualSwim(CheckPosition(newPos), lookAhead, isFaceAhead: false);
+			vTrail.Update(newPos, lookAhead);
 		}
 
 
@@ -162,6 +176,15 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		private void ConsumeFishEnergy() => fishController.Energy.Consume(rod.Energy.BlowBack * Time.deltaTime);
 		private void ConsumeRodEnergy() => rod.Energy.Consume(fishController.Energy.BlowBack * Time.deltaTime, autoRest: false);
 
+
+		private void ShowHideVTrailOnRest()
+		{
+			if (!fishController.Energy.IsResting && !vTrail.IsActive)
+				vTrail.Show();
+
+			else if (fishController.Energy.IsResting && vTrail.IsActive)
+				vTrail.Hide();
+		}
 
 		[System.Diagnostics.Conditional("RDEBUG")]
 		private void ShowDebug() => ViewController.UiController.DebugShow(rod.Energy.Max, fishController.Energy.Max);

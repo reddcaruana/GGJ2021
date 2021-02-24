@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Assets.Scripts.Framework.Utils;
-using System;
 
 namespace Assets.Scripts.Generic
 {

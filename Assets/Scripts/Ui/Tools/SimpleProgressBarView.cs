@@ -1,5 +1,4 @@
-﻿using System;
-using Assets.Scripts.Framework.Ui;
+﻿using Assets.Scripts.Framework.Ui.ProgressBars;
 
 namespace Assets.Scripts.Ui.Tools
 {

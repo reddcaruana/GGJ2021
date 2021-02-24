@@ -35,7 +35,7 @@ namespace Assets.Scripts.Seasons
 			float x = ViewController.Area.Width - (ViewController.Area.Width * MARGIN_NORMALISED);
 			float y = ViewController.Area.Height * NumberOfSegments;
 			Vector2 center = new Vector2();
-			center.y = PayWall == null ? 0 : -(ViewController.Area.Height / 2f);
+			center.y = PayWall == null ? 0 : -(ViewController.Area.HalfHeight);
 			FishTankArea = new Area2D(x, y, center);
 
 			fishControllers = new FishController[MaxFish];
@@ -54,12 +54,19 @@ namespace Assets.Scripts.Seasons
 			SetView(baseWorldPosition);
 		}
 
-		private void SetView(Vector3 baseWorldPosition)
+		public Vector2 GetVisualSize()
 		{
 			Vector2 visualSize = FishTankArea.Size;
 
 			if (PayWall != null)
 				visualSize.y += ViewController.Area.Height;
+
+			return visualSize;
+		}
+
+		private void SetView(Vector3 baseWorldPosition)
+		{
+			Vector2 visualSize = GetVisualSize();
 
 			view.Set(visualSize, FishTankArea.Center, NiceName, baseWorldPosition);
 
@@ -87,6 +94,8 @@ namespace Assets.Scripts.Seasons
 			for (int i = 0; i < fishControllers.Length; i++)
 				fishControllers[i].CreateView(view.FishTank);
 		}
+
+		public bool CompareView(SeasonView otherView) => view == otherView;
 
 		private void SetAllFish()
 		{
@@ -180,6 +189,17 @@ namespace Assets.Scripts.Seasons
 				approachFloat.ApproachFloat(localPosition);
 
 			return approachFloat;
+		}
+
+		public void OnBoatMovement()
+		{
+			for (int i = 0; i < fishControllers.Length; i++)
+			{
+				if (!fishControllers[i].CanCatch)
+					continue;
+
+				fishControllers[i].FearOfBoats();
+			}
 		}
 	}
 }

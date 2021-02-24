@@ -7,7 +7,6 @@ namespace Assets.Scripts.Framework.Tools
 {
 	public class RDAccelerationModule
 	{
-		private const float SPEED_VECTOR_TRASH_HOLD = 0.0001f;
 
 		public bool HasBounds => checkPosition != null;
 		public Vector2 DirectionVector { get; private set; } = new Vector2(0f, 1f);
@@ -28,6 +27,7 @@ namespace Assets.Scripts.Framework.Tools
 				{
 					CoroutineRunner.HaltCoroutine(coroutine);
 					coroutine = null;
+					speedVector = Statics.VECTOR2_ZERO;
 				}
 			} 
 		}
@@ -39,6 +39,7 @@ namespace Assets.Scripts.Framework.Tools
 		private float speed;
 		private float drag = 0.99f;
 		private Vector2 speedVector = new Vector2();
+		private float speedVectorTrashHold = 0.0001f;
 
 		private Coroutine coroutine;
 
@@ -58,6 +59,8 @@ namespace Assets.Scripts.Framework.Tools
 			Vector3 result = MathUtils.FindCoordinatesFromAngle(angle, 1f);
 			SetDirection(result);
 		}
+
+		public void SetSpeedVectorTrashHold(float trashHold) => speedVectorTrashHold = trashHold;
 
 		public void SetDirection(Vector3 directionVector) => this.DirectionVector = directionVector;
 
@@ -109,7 +112,7 @@ namespace Assets.Scripts.Framework.Tools
 			speedVector[1] = Check(speedVector[1]) ? 0 : speedVector[1];
 
 			bool Check(float value) => 
-				MathUtils.InRangeFloat(value, -SPEED_VECTOR_TRASH_HOLD, SPEED_VECTOR_TRASH_HOLD);
+				MathUtils.InRangeFloat(value, -speedVectorTrashHold, speedVectorTrashHold);
 		}
 	}
 }
