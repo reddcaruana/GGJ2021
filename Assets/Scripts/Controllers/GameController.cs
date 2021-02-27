@@ -13,9 +13,13 @@ namespace Assets.Scripts.Controllers
 		public bool IsDragging { get; private set; }
 
 		private Action onUpdate;
+		private Action<bool> onPause;
 
 		protected override void Awake()
 		{
+			QualitySettings.vSyncCount = 0;
+			Application.targetFrameRate = 60;
+
 			base.Awake();
 			MakePersistent();
 
@@ -40,14 +44,16 @@ namespace Assets.Scripts.Controllers
 		private void Update()
 		{
 			onUpdate?.Invoke();
-			InputManager.Gyro();
 
 			if (InputManager.IsDragging)
 				InputManager.DragUpdate();
 		}
-
 		public void RegisterToUpdate(Action callback) => onUpdate += callback;
 		public void UnregisterToUpdate(Action callback) => onUpdate -= callback;
+
+		private void OnApplicationPause(bool pause) => onPause?.Invoke(pause);
+		public void RegisterToPause(Action<bool> callback) => onPause += callback;
+		public void UnregisterToPause(Action<bool> callback) => onPause -= callback;
 
 		private void OnClick(Vector3 worldPosition)
 		{
@@ -60,7 +66,6 @@ namespace Assets.Scripts.Controllers
 			IsDragging = true;
 			ViewController.FollowStart();
 		}
-
 
 		private void OnDrag(DragData data)
 		{

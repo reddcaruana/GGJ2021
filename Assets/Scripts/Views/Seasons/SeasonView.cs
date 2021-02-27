@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
+using Assets.Scripts.Seasons;
+using Assets.Scripts.Factories;
 using Assets.Scripts.Framework;
+using System.Collections.Generic;
 using Assets.Scripts.Controllers;
 using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
@@ -8,8 +11,9 @@ namespace Assets.Scripts.Views.Seasons
 {
 	public class SeasonView : MonoBehaviour
 	{
-		private const float WATER_DEPTH_NORMALISED = 0.77f;
+		private const float WATER_DEPTH_NORMALISED = 0.9f;
 
+		private readonly List<BottomDebriViewPoolObject> BottomDebri = new List<BottomDebriViewPoolObject>();
 		public Transform FishTank { get; private set; }
 		private SpriteRenderer waterSurfaceSpriteRend;
 		private SpriteRenderer waterDepthSpriteRend;
@@ -92,6 +96,7 @@ namespace Assets.Scripts.Views.Seasons
 				terrainSidePrefab.transform.localScale = scale;
 			}
 
+			DistributeUnderwaterAssets();
 		}
 
 		private SpriteRenderer CreateTerrainSidePrefab(string typeStr)
@@ -118,6 +123,16 @@ namespace Assets.Scripts.Views.Seasons
 			};
 
 			return terrain;
+		}
+
+		private void DistributeUnderwaterAssets()
+		{
+			int slices = Mathf.FloorToInt(waterSurfaceSpriteRend.size.y / ViewController.Area.Height);
+
+			Vector3 center = GetBottomWorldPosition();
+			center.y += ViewController.Area.HalfHeight;
+
+			FactoryManager.BottomDebri.RecycleBottomDebri(BottomDebri, waterDepthSpriteRend.transform, slices, center, waterDepthSpriteRend.size.x);
 		}
 
 		public Vector3 GetTopWorldPosition() => GetTopWorldPosition(transform.position);

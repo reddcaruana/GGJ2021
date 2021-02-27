@@ -19,7 +19,15 @@ namespace Assets.Scripts.Rods
 				view.PositionUpdate(startWorldPos, endWorlPosition);
 		}
 
-		public void ProgressBarUpdate(float value) => view.ProgressBarUpdate(value);
+		public void ProgressBarUpdate(float value, bool isRecovery, float duration = 0)
+		{
+			if (isRecovery)
+				view.ProgressBarRecoveryUpdate(value, duration);
+			else
+				view.ProgressBarUpdate(value);
+		}
+
+		public void LineSlackWarning(bool value, float cycleDuration) => view.LineSlackWarning(value, cycleDuration);
 
 		public void LineSnap(Action onComplete) => view.LineSnap(onComplete);
 

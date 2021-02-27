@@ -97,6 +97,14 @@ namespace Assets.Scripts.Seasons
 
 		public bool CompareView(SeasonView otherView) => view == otherView;
 
+		public void ParentToView(Transform child)
+		{
+			if (!HasView || child.parent == view.transform)
+				return;
+
+			child.SetParent(view.transform);
+		}
+
 		private void SetAllFish()
 		{
 			for (int i = 0; i < fishControllers.Length; i++)
@@ -123,7 +131,10 @@ namespace Assets.Scripts.Seasons
 			for (int i = 0; i < fishControllers.Length; i++)
 			{
 				fishControllers[i].SetSpawnPoint(localPosition);
-				fishControllers[i].Appear();
+				
+				if (!fishControllers[i].IsBaotFear())
+					fishControllers[i].Appear();
+				
 				localPosition.y -= verticalStep;
 			}
 		}

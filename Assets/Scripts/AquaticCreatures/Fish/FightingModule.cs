@@ -3,15 +3,19 @@ using System.Collections;
 using Assets.Scripts.Rods;
 using Assets.Scripts.Utils;
 using Assets.Scripts.Constants;
+using Assets.Scripts.Views.Fish;
 using Assets.Scripts.Controllers;
 using Assets.Scripts.Framework.Tools;
 using Assets.Scripts.Framework.Utils;
-using Assets.Scripts.Views.Fish;
 
 namespace Assets.Scripts.AquaticCreatures.Fish
 {
 	public class FightingModule
 	{
+		private const float LIMIT_PADDING = 0.8f;
+		private const float MAX_REST_TIME = 3;
+		private const float WARNING_REST_TIME = MAX_REST_TIME * 0.33f;
+
 		private static VTrail vTrail;
 		private readonly Vector3[] directionVectors = new Vector3[]
 		{
@@ -32,7 +36,10 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			this.rod = rod;
 
 			realInTarget = new Vector2(0f, ViewController.Area.BottomRightCorner.y);
-			area = new Area2D(ViewController.CurrentSeason.FishTankArea.Width, ViewController.Area.Height, ViewController.MainCamera.transform.position);
+			area = new Area2D(
+				width: ViewController.CurrentSeason.FishTankArea.Width * LIMIT_PADDING,
+				height: ViewController.Area.Height * LIMIT_PADDING,
+				center: ViewController.MainCamera.transform.position);
 
 			if (vTrail == null)
 			{
@@ -85,11 +92,18 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 					break;
 				}
 
-				if (!fishController.Energy.IsResting && rod.Energy.IsResting && Time.time - startRestingTime >= 3f)
+				if (!fishController.Energy.IsResting && rod.Energy.IsResting)
 				{
-					DebugUtils.Log("Escaped due to much resting.");
-					rod.FishEscaped();
-					break;
+					float restingTime = Time.time - startRestingTime;
+
+					if (restingTime >= MAX_REST_TIME)
+					{
+						DebugUtils.Log("Escaped due to much resting.");
+						rod.FishEscaped();
+						break;
+					}
+					else if (!rod.IsLineSlack && restingTime >= WARNING_REST_TIME)
+						rod.LineSlack(true);
 				}
 
 				if (rod.Energy.Value == 0)
@@ -108,6 +122,8 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 				else if (rod.PullState != fishPullState)
 				{
 					rod.Energy.StopResting();
+					if (rod.IsLineSlack)
+						rod.LineSlack(false);
 
 					if ((rod.PullState == PullState.Left && fishPullState == PullState.Right) || 
 						(rod.PullState == PullState.Right && fishPullState == PullState.Left))

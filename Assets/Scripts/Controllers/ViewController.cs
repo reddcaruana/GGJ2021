@@ -8,6 +8,7 @@ using Assets.Scripts.Framework.Input;
 using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.AquaticCreatures;
 using Assets.Scripts.AquaticCreatures.Fish;
+using Assets.Scripts.Factories;
 
 namespace Assets.Scripts.Controllers
 {
@@ -15,6 +16,7 @@ namespace Assets.Scripts.Controllers
 	{
 		public static Camera MainCamera = Camera.main;
 		public static readonly Area2D Area;
+		public static readonly Vector2 ScreenTop;
 		public static readonly Vector2 ScreenBottom;
 
 
@@ -32,6 +34,7 @@ namespace Assets.Scripts.Controllers
 			float height = MainCamera.orthographicSize * 2.0f;
 			float width = height * Screen.width / Screen.height;
 			Area = new Area2D(width, height, Statics.VECTOR2_ZERO);
+			ScreenTop = new Vector2(0, Area.HalfHeight); ;
 			ScreenBottom = new Vector2(0, -Area.HalfHeight);
 		}
 
@@ -48,13 +51,17 @@ namespace Assets.Scripts.Controllers
 
 			CreateSeasons();
 
-			FishFactory.Init(30);
+			FactoryManager.Fish.Init(30);
+			FactoryManager.BottomDebri.Init(400);
+			FactoryManager.Stream.Init(8);
+
 			seasonScrollController.Init();
 			UiController.Init();
 
 			InputManager.Init(MainCamera);
 			InputManager.Enable(true);
 
+			FactoryManager.Stream.StartStream(8, null);
 		}
 
 		public static void CreateSeasons()

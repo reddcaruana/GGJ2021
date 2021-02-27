@@ -51,6 +51,14 @@ namespace Assets.Scripts.Input
                     ""expectedControlType"": ""Vector3"",
                     ""processors"": """",
                     ""interactions"": """"
+                },
+                {
+                    ""name"": ""Attitude"",
+                    ""type"": ""Value"",
+                    ""id"": ""d182d988-bc36-4174-9b48-289cd06d92a9"",
+                    ""expectedControlType"": ""Quaternion"",
+                    ""processors"": """",
+                    ""interactions"": """"
                 }
             ],
             ""bindings"": [
@@ -130,6 +138,17 @@ namespace Assets.Scripts.Input
                     ""action"": ""Gyro"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d5b0340d-868e-4d82-8917-83d921788f64"",
+                    ""path"": ""<AttitudeSensor>/attitude"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Android"",
+                    ""action"": ""Attitude"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -175,6 +194,7 @@ namespace Assets.Scripts.Input
             m_Player_Position = m_Player.FindAction("Position", throwIfNotFound: true);
             m_Player_PrimaryContact = m_Player.FindAction("PrimaryContact", throwIfNotFound: true);
             m_Player_Gyro = m_Player.FindAction("Gyro", throwIfNotFound: true);
+            m_Player_Attitude = m_Player.FindAction("Attitude", throwIfNotFound: true);
         }
 
         public void Dispose()
@@ -228,6 +248,7 @@ namespace Assets.Scripts.Input
         private readonly InputAction m_Player_Position;
         private readonly InputAction m_Player_PrimaryContact;
         private readonly InputAction m_Player_Gyro;
+        private readonly InputAction m_Player_Attitude;
         public struct PlayerActions
         {
             private @InputData m_Wrapper;
@@ -236,6 +257,7 @@ namespace Assets.Scripts.Input
             public InputAction @Position => m_Wrapper.m_Player_Position;
             public InputAction @PrimaryContact => m_Wrapper.m_Player_PrimaryContact;
             public InputAction @Gyro => m_Wrapper.m_Player_Gyro;
+            public InputAction @Attitude => m_Wrapper.m_Player_Attitude;
             public InputActionMap Get() { return m_Wrapper.m_Player; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -257,6 +279,9 @@ namespace Assets.Scripts.Input
                     @Gyro.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnGyro;
                     @Gyro.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnGyro;
                     @Gyro.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnGyro;
+                    @Attitude.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnAttitude;
+                    @Attitude.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnAttitude;
+                    @Attitude.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnAttitude;
                 }
                 m_Wrapper.m_PlayerActionsCallbackInterface = instance;
                 if (instance != null)
@@ -273,6 +298,9 @@ namespace Assets.Scripts.Input
                     @Gyro.started += instance.OnGyro;
                     @Gyro.performed += instance.OnGyro;
                     @Gyro.canceled += instance.OnGyro;
+                    @Attitude.started += instance.OnAttitude;
+                    @Attitude.performed += instance.OnAttitude;
+                    @Attitude.canceled += instance.OnAttitude;
                 }
             }
         }
@@ -301,6 +329,7 @@ namespace Assets.Scripts.Input
             void OnPosition(InputAction.CallbackContext context);
             void OnPrimaryContact(InputAction.CallbackContext context);
             void OnGyro(InputAction.CallbackContext context);
+            void OnAttitude(InputAction.CallbackContext context);
         }
     }
 }

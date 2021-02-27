@@ -44,6 +44,7 @@ namespace Assets.Scripts.Views.Rods
 				splashSprites[i] = AssetLoader.ME.Loader<Sprite>($"Sprites/RodFloat/Splash/splash{i + 1}");
 
 			animator = new RDAnimator(floatingSprites.Length, OnFrameUpdate);
+			spriteRenderer.sprite = floatingSprites[0];
 		}
 
 		public void Cast(Vector3 targetWorldPosition, float duration, Action onComplete)
@@ -62,9 +63,13 @@ namespace Assets.Scripts.Views.Rods
 			};
 
 			transform.DOLocalRotateQuaternion(Quaternion.identity, duration).SetEase(Ease.OutSine);
-			transform.DOMove(targetWorldPosition, duration).onComplete = () => onComplete?.Invoke();
+			transform.DOMove(targetWorldPosition, duration).onComplete = OnComplete;
 
-			Float();
+			void OnComplete()
+			{
+				Float();
+				onComplete?.Invoke();
+			}
 		}
 
 		public void Nibble(float duration) => Animate(AnimationType.Nibble, nibbleSprites.Length, (int)(NIBBLING_FPS * duration));
@@ -103,19 +108,15 @@ namespace Assets.Scripts.Views.Rods
 
 		public void Reset(Vector3 targetWorldPosition, float duration, Action onComplete = null)
 		{
-			Debug.Log("Reset Float");
-			Float();
+			animator.Stop();
+			spriteRenderer.sprite = floatingSprites[0];
 			spriteRenderer.color = Statics.COLOR_ZERO;
 			spriteRenderer.DOColor(Statics.COLOR_WHITE, duration * 0.2f);
 
 			transform.DOScale(StartScale, duration).SetEase(Ease.InOutSine);
 			transform.DOMove(targetWorldPosition, duration).SetEase(Ease.InOutSine).onComplete = OnComplete;
 
-			void OnComplete()
-			{
-				animator.Stop();
-				onComplete?.Invoke();
-			}
+			void OnComplete() => onComplete?.Invoke();
 		}
 
 		private void OnFrameUpdate(int frameIndex)

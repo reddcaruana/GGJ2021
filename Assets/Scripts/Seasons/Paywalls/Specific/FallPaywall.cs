@@ -16,11 +16,11 @@ namespace Assets.Scripts.Seasons.Paywalls.Specific
 
 		protected override Vector3[] FishRequiredLocalPosition { get; } = new Vector3[]
 		{
-			new Vector3(1.13f, 1.41f, 0f),
-			new Vector3(2.03f, 1.45f, 0f),
-			new Vector3(0.85f, 1.72f, 0f),
-			new Vector3(1.8f, 0.69f, 0f),
-			new Vector3(2.65f, 0.99f, 0f)
+			new Vector3(-1.85f, 0.48f, 0f),
+			new Vector3(-0.13f, 0.67f, 0f),
+			new Vector3(1.34f, 0.72f, 0f),
+			new Vector3(2.1f, 0.83f, 0f),
+			new Vector3(2.79f, 0.7f, 0f)
 		};
 	}
 }

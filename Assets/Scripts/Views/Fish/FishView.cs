@@ -7,6 +7,7 @@ using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.AquaticCreatures.Fish;
 using Assets.Scripts.Framework.Tools;
 using LoopType = Assets.Scripts.Framework.Tools.LoopType;
+using Assets.Scripts.Controllers;
 
 namespace Assets.Scripts.Views.Fish
 {
@@ -20,8 +21,9 @@ namespace Assets.Scripts.Views.Fish
 		private static readonly Sprite[] FishSilhouetteSprites = new Sprite[8];
 		public bool IsManualOverride { get; private set; }
 
-		private static readonly Color SOLID_COLOR = Statics.COLOR_BLACK;
 		private SpriteRenderer spriteRenderer;
+		private SpriteRenderer shadowSpriteRenderer;
+		private float shadowAlphaMax;
 		private Vector3 startPos = new Vector3();
 		private Vector3 endPos = new Vector3();
 		private bool isIdle;
@@ -41,11 +43,14 @@ namespace Assets.Scripts.Views.Fish
 			animator.Loop = LoopType.PingPong;
 
 			spriteRenderer = transform.Find("SpriteFish").GetComponent<SpriteRenderer>();
-			spriteRenderer.sprite = FishSilhouetteSprites[0];
-			spriteRenderer.color = Statics.COLOR_ZERO;
+			shadowSpriteRenderer = spriteRenderer.transform.Find("SpriteFishShadow").GetComponent<SpriteRenderer>();
+			shadowAlphaMax = shadowSpriteRenderer.color.a;
+			SpriteChange(0);
+			DoFade(0, 0);
+			GameController.ME.RegisterToUpdate(OnUpdate);
 		}
 
-		private void Update()
+		private void OnUpdate()
 		{
 			Idle();
 		}
@@ -56,6 +61,22 @@ namespace Assets.Scripts.Views.Fish
 			// Change Image here
 			spriteRenderer.transform.localScale = Statics.VECTOR3_ONE; // resets Bounds
 			spriteRenderer.transform.localScale = Statics.VECTOR3_ONE * (controller.Size / spriteRenderer.bounds.size.y);
+		}
+
+		private void SpriteChange(int index) =>
+			spriteRenderer.sprite = shadowSpriteRenderer.sprite = FishSilhouetteSprites[index];
+
+		private void ColorChnage(Color color)
+		{
+			spriteRenderer.color = color;
+			color.a = shadowAlphaMax;
+			shadowSpriteRenderer.color = color;
+		}
+
+		private void DoFade(float value, float duration)
+		{
+			spriteRenderer.DOFade(value, duration).SetEase(Ease.InOutSine);
+			shadowSpriteRenderer.DOFade(value * shadowAlphaMax, duration).SetEase(Ease.InOutSine);
 		}
 
 		public void Reposition(Vector3 localPosition, float proximityFear, float proximityBite)
@@ -86,16 +107,14 @@ namespace Assets.Scripts.Views.Fish
 			isIdle = true;
 			IsManualOverride = false;
 
+			PlaySwiAnimation();
 			spriteRenderer.transform.localPosition = startPos;
 			spriteRenderer.transform.DOLocalMoveY(endPos.y, duration)
 				.SetEase(Ease.OutSine)
 				.OnComplete(() => onComplete?.Invoke());
 
 			Face(endPos, duration / 2f);
-
-			spriteRenderer.color = Statics.COLOR_ZERO;
-			spriteRenderer.DOColor(SOLID_COLOR, duration)
-				.SetEase(Ease.InOutSine);
+			DoFade(1, duration);
 		}
 
 		private void Idle()
@@ -103,7 +122,6 @@ namespace Assets.Scripts.Views.Fish
 			if (!isIdle)
 				return;
 
-			PlaySwiAnimation();
 			spriteRenderer.transform.RotateAround(transform.position, Vector3.forward, -20 * Time.deltaTime);
 		}
 
@@ -123,11 +141,15 @@ namespace Assets.Scripts.Views.Fish
 
 			spriteRenderer.transform.DOLocalMoveY(startPos.y, duration)
 				.SetEase(Ease.InOutSine)
-				.OnComplete(() => onComplete?.Invoke());
+				.onComplete = OnComplete;
 
-			spriteRenderer.color = SOLID_COLOR;
-			spriteRenderer.DOColor(Statics.COLOR_ZERO, duration)
-				.SetEase(Ease.InOutSine);
+			DoFade(0, duration);
+
+			void OnComplete()
+			{
+				animator.Stop();
+				onComplete?.Invoke();
+			}
 		}
 
 
@@ -209,7 +231,7 @@ namespace Assets.Scripts.Views.Fish
 			animator.Play();
 		}
 
-		private void OnFrameUpdate(int frame) => spriteRenderer.sprite = FishSilhouetteSprites[frame];
+		private void OnFrameUpdate(int frame) => SpriteChange(frame);
 
 		Transform debugTarget;
 

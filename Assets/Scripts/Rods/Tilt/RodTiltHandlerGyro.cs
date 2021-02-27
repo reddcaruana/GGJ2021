@@ -9,7 +9,7 @@ namespace Assets.Scripts.Rods.Tilt
 	public class RodTiltHandlerGyro : RodTiltHandler
 	{
 		// Calculated by calibration that 0.001 plus and minus the device is completely level
-		private const float SENSITIVITY = 3;
+		private const float SENSITIVITY = 6;
 
 		protected override void StartInternal()
 		{
@@ -23,6 +23,7 @@ namespace Assets.Scripts.Rods.Tilt
 		}
 
 		/*
+		 *  GYRO
 		 * X Up and Down
 		 * Y Roll
 		 * Z Flat Spin
@@ -33,7 +34,7 @@ namespace Assets.Scripts.Rods.Tilt
 
 			while (IsActive)
 			{
-				angularVelocity = InputManager.Gyro();
+				angularVelocity = InputManager.GetGyro();
 
 				if (!MathUtils.InRangeFloat(angularVelocity.y, -SENSITIVITY, SENSITIVITY))
 				{
@@ -63,9 +64,9 @@ namespace Assets.Scripts.Rods.Tilt
 			Vector3 angularVelocity;
 
 			float startTime = Time.time;
-			while(Time.time - startTime < 10f)
+			while (Time.time - startTime < 10f)
 			{
-				angularVelocity = InputManager.Gyro();
+				angularVelocity = InputManager.GetGyro();
 
 				for (int i = 0; i < 3; i++)
 				{

@@ -45,15 +45,10 @@ namespace Assets.Scripts.Generic
 
 		private IEnumerator RestCoroutine()
 		{
-			float startTime;
 			while(IsResting && Value < Max)
 			{
-				startTime = Time.time;
-				while(IsResting && Time.time - startTime < 1f)
-					yield return null;
-
-				if (IsResting)
-					Recover(RECOVERY_PER_SECOND);
+				Recover(Time.deltaTime * RECOVERY_PER_SECOND);
+				yield return null;
 			}
 		}
 

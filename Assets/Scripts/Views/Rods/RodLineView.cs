@@ -23,6 +23,8 @@ namespace Assets.Scripts.Views.Rods
 		private SpriteRenderer rodSideSnapSpriteRenderer;
 		private SpriteRenderer fishSideSnapSpriteRenderer;
 
+		private readonly Color DangerLineColorFlash = Statics.COLOR_WHITE; //new Color(1f, 0.5f, 0f, 1f);
+
 		public void Awake()
 		{
 			for (int i = 0; i < lineSnapSprites.Length; i++)
@@ -62,6 +64,14 @@ namespace Assets.Scripts.Views.Rods
 		}
 
 		public void ProgressBarUpdate(float value) => progressBarView.ProgressUpdate(value);
+		public void ProgressBarRecoveryUpdate(float value, float duration) => progressBarView.RecoveryProgressUpdate(value, duration);
+		public void LineSlackWarning(bool value, float cycleDuration)
+		{
+			if (value)
+				progressBarView.ColorFlashStart(DangerLineColorFlash, cycleDuration);
+			else
+				progressBarView.ColorFlashStop();
+		}
 
 		public void LineSnap(Action onComplete)
 		{

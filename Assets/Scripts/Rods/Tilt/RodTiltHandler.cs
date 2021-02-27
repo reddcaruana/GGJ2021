@@ -6,16 +6,18 @@ namespace Assets.Scripts.Rods.Tilt
 	{
 		protected Action tiltLeft;
 		protected Action tiltRight;
+		protected Action tiltCenter;
 
 		protected bool IsActive { get; private set; }
 
-		public void Init(Action tiltLeft, Action tiltRight)
+		public void Init(Action tiltLeft, Action tiltRight, Action tiltCenter)
 		{
 			this.tiltLeft = tiltLeft;
 			this.tiltRight = tiltRight;
+			this.tiltCenter = tiltCenter;
 		}
 
-		public  void Start()
+		public void Start()
 		{
 			IsActive = true;
 			StartInternal();

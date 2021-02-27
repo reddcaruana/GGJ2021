@@ -38,8 +38,9 @@ namespace Assets.Scripts.Rods
 				CoroutineRunner.Wait(duration, onComplete);
 		}
 
-		public void Nibble(float duration, Action onComplete = null)
+		public void Nibble(Action onComplete = null)
 		{
+			float duration = Random.Range(4, 8);
 			IsNibbling = true;
 			int totalNibbles = Random.Range(2, 6);
 			float oneNibbleDuration = duration / totalNibbles;

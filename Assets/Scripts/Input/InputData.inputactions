@@ -36,6 +36,14 @@
                     "expectedControlType": "Vector3",
                     "processors": "",
                     "interactions": ""
+                },
+                {
+                    "name": "Attitude",
+                    "type": "Value",
+                    "id": "d182d988-bc36-4174-9b48-289cd06d92a9",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": ""
                 }
             ],
             "bindings": [
@@ -113,6 +121,17 @@
                     "processors": "",
                     "groups": "Android",
                     "action": "Gyro",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d5b0340d-868e-4d82-8917-83d921788f64",
+                    "path": "<AttitudeSensor>/attitude",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Android",
+                    "action": "Attitude",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
