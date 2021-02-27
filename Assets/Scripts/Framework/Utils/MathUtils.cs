@@ -155,5 +155,14 @@ namespace Assets.Scripts.Framework.Utils
 			BottomRightCorner.y -= Height;
 		}
 
+
+		public Vector2 GetRandomPosition()
+		{
+			return new Vector2()
+			{
+				x = UnityEngine.Random.Range(TopLeftCorner.x, BottomRightCorner.x),
+				y = UnityEngine.Random.Range(TopLeftCorner.y, BottomRightCorner.y)
+			};
+		}
 	}
 }

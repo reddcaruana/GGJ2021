@@ -27,6 +27,7 @@ namespace Assets.Scripts.Framework.Tools
 				{
 					CoroutineRunner.HaltCoroutine(coroutine);
 					coroutine = null;
+					speed = 0;
 					speedVector = Statics.VECTOR2_ZERO;
 				}
 			} 
@@ -60,9 +61,9 @@ namespace Assets.Scripts.Framework.Tools
 			SetDirection(result);
 		}
 
+		public void SetDirection(Vector3 directionVector) => DirectionVector = directionVector;
+		
 		public void SetSpeedVectorTrashHold(float trashHold) => speedVectorTrashHold = trashHold;
-
-		public void SetDirection(Vector3 directionVector) => this.DirectionVector = directionVector;
 
 		public void SetSpeed(float speed) => this.speed = speed;
 

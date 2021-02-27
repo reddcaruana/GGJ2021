@@ -51,9 +51,20 @@ namespace Assets.Scripts.Framework.Input
 				InputSystem.DisableDevice(UnityEngine.InputSystem.Gyroscope.current);
 		}
 
+		public static Vector3 GetGyro() => inputData.Player.Gyro.ReadValue<Vector3>();
+
+		public static void EnableAttitude(bool value)
+		{
+			if (value)
+				InputSystem.EnableDevice(AttitudeSensor.current);
+			else
+				InputSystem.DisableDevice(AttitudeSensor.current);
+		}
+
+		public static Quaternion GetAttitude() => inputData.Player.Attitude.ReadValue<Quaternion>();
+
 		public static Vector2 GetScreenPosition() => inputData.Player.Position.ReadValue<Vector2>();
 		public static Vector3 GetWorldPosition() => mainCamera.ScreenToWorldPoint(GetScreenPosition());
-		public static Vector3 Gyro() => inputData.Player.Gyro.ReadValue<Vector3>();
 		 
 		private static void ClickPosition(CallbackContext context) => onClickPosition?.Invoke(GetWorldPosition());
 		private static void Click(CallbackContext context) => onClick?.Invoke();
