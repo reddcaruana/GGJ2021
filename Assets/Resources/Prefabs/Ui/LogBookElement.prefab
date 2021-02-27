@@ -92,6 +92,7 @@ GameObject:
   - component: {fileID: 5364554151348013126}
   - component: {fileID: -546188087332101252}
   - component: {fileID: -6031952523506309683}
+  - component: {fileID: -2353513206632315750}
   m_Layer: 5
   m_Name: LogBookElement
   m_TagString: Untagged
@@ -222,6 +223,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &-6031952523506309683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8373515599387933866}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edcf2db3a8c829741a7ed5203e72a6d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-2353513206632315750
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
