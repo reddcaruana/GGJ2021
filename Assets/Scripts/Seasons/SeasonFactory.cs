@@ -20,6 +20,7 @@ namespace Assets.Scripts.Seasons
 			{
 				case SeasonAreaType.One: return new Summer();
 				case SeasonAreaType.Two: return new Fall();
+				case SeasonAreaType.Three: return new Winter();
 				default: DebugUtils.LogError($"[SeasonFactory] {type} Not supported"); return null;
 			}
 		}

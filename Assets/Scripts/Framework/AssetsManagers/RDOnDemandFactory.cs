@@ -5,7 +5,7 @@ namespace Assets.Scripts.Framework.AssetsManagers
 {
 	public abstract class RDOnDemandFactory<T, V>
 		where T : PoolObject<V>, new()
-		where V : MonoBehaviour
+		where V : Component
 	{
 		private T[] pool;
 		public void Init(int totalCount) =>

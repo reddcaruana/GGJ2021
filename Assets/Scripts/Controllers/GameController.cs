@@ -82,8 +82,8 @@ namespace Assets.Scripts.Controllers
 
 			Vector3 filteredDirection = data.FilteredDirection();
 
-			ShowHideLogBook(filteredDirection);
-			TryAccelerateBoat(filteredDirection, data);
+			if (!TryAccelerateBoat(filteredDirection, data) && !Rod.IsBusy)
+				ShowHideLogBook(filteredDirection);
 		}
 
 		private bool TryAccelerateBoat(Vector3 filteredDirection, SwipeData data)

@@ -54,6 +54,7 @@ namespace Assets.Scripts.Controllers
 			FactoryManager.Fish.Init(30);
 			FactoryManager.BottomDebri.Init(400);
 			FactoryManager.Stream.Init(8);
+			FactoryManager.Terrain.Init(500);
 
 			seasonScrollController.Init();
 			UiController.Init();

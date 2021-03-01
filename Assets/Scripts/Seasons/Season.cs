@@ -51,6 +51,14 @@ namespace Assets.Scripts.Seasons
 		public void AssignView(SeasonView view, Vector3 baseWorldPosition)
 		{
 			this.view = view;
+			if (PayWall != null) 
+			{
+				this.view.PaywallView.gameObject.SetActive(true);
+				PayWall.AssignView(this.view.PaywallView);
+			}
+			else
+				this.view.PaywallView.gameObject.SetActive(false);
+
 			SetView(baseWorldPosition);
 		}
 
@@ -74,7 +82,7 @@ namespace Assets.Scripts.Seasons
 			{
 				Vector3 paywallPos = new Vector3();
 				paywallPos.y = (visualSize.y / 2f);
-				PayWall.CreateView(view.transform, paywallPos);
+				PayWall.SetView(paywallPos);
 			}
 
 			CreateFishViews();

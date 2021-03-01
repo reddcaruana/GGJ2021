@@ -202,13 +202,15 @@ namespace Assets.Scripts.Controllers
 			int nextSeasonIndex = NextViewIndex;
 			Season upcomingSeason = null;
 			Vector3 basePosition;
+			float screenLoadingHeight = ViewController.Area.Height + ViewController.Area.HalfHeight;
 
-			if (seasonViews[currentViewIndex].GetTopWorldPosition(newPosition).y - (ViewController.Area.Height + ViewController.Area.HalfHeight) < ViewController.Area.HalfHeight)
+			if (seasonViews[currentViewIndex].GetTopWorldPosition(newPosition).y - screenLoadingHeight < ViewController.Area.HalfHeight)
 			{
 				upcomingSeason = ViewController.PeekNextSeason();
 				basePosition = seasonViews[currentViewIndex].GetTopWorldPosition(newPosition);
 			}
-			else if (seasonViews[currentViewIndex].GetBottomWorldPosition(newPosition).y + (ViewController.Area.Height + ViewController.Area.HalfHeight) > -ViewController.Area.HalfHeight)
+			else if (ViewController.CurrentSeason.Type != Constants.SeasonAreaType.One &&
+				seasonViews[currentViewIndex].GetBottomWorldPosition(newPosition).y + screenLoadingHeight > -ViewController.Area.HalfHeight)
 			{
 				upcomingSeason = ViewController.PeekPrevSeason();
 				basePosition = seasonViews[currentViewIndex].GetBottomWorldPosition(newPosition);

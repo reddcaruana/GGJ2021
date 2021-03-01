@@ -14,12 +14,11 @@ namespace Assets.Scripts.Factories
 	{
 		public const int AT_LEAST = 30;
 
-		private const float SCALE_MIN = 0.5f;
-		private const float SCALE_MAX = 2.5f;
-		private static readonly Color COLOR_MIN = new Color(0.7f, 0.7f, 0.7f, 1f);
-		private static readonly Color COLOR_MAX = Statics.COLOR_WHITE;
+		private const float SCALE_MIN = 0.2f;
+		private const float SCALE_MAX = 2f;
 
-
+		private static readonly Color ColoMin = new Color(0.7f, 0.7f, 0.7f, 1f);
+		private static readonly Color ColorMax = Statics.COLOR_WHITE;
 
 		private static readonly string[] DebriArray = new string[]
 		{
@@ -49,20 +48,22 @@ namespace Assets.Scripts.Factories
 					if (debriIndex >= bottomDebri.Count)
 						bottomDebri.Add(GetAvailable());
 
+					bottomDebri[debriIndex].Spawn(parent, area.GetRandomPosition());
 					bottomDebri[debriIndex].View.SetSprite(GetRandomSprite());
 					bottomDebri[debriIndex].View.transform.localScale = Statics.VECTOR3_ONE * Random.Range(SCALE_MIN, SCALE_MAX);
 					bottomDebri[debriIndex].View.transform.localRotation = Quaternion.Euler(0, 0, Random.Range(0, 359f));
-					bottomDebri[debriIndex].View.SetColor(Color.Lerp(COLOR_MIN, COLOR_MAX, Random.value));
-					bottomDebri[debriIndex].Spawn(parent, area.GetRandomPosition());
+					bottomDebri[debriIndex].View.SetColor(Color.Lerp(ColoMin, ColorMax, Random.value));
 					debriIndex++;
 				}
 			}
 
-			for (int i = debriIndex; i < bottomDebri.Count; i++)
-				bottomDebri[i].Despawn();
-
 			if (debriIndex < bottomDebri.Count)
+			{
+				for (int i = debriIndex; i < bottomDebri.Count; i++)
+					bottomDebri[i].Despawn();
+
 				bottomDebri.RemoveRange(debriIndex, bottomDebri.Count - debriIndex);
+			}
 		}
 
 		private static Sprite GetRandomSprite()

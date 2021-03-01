@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Views.Seasons.Paywalls;
 
 namespace Assets.Scripts.Seasons.Paywalls
@@ -16,15 +15,18 @@ namespace Assets.Scripts.Seasons.Paywalls
 		public void Set(string seasonStr) =>
 			this.seasonStr = seasonStr;
 
-		public void CreateView(Transform parent, Vector3 localPosition)
+		public void AssignView(PaywallView view) => this.view = view;
+
+		public void SetView(Vector3 localPosition)
 		{
-			view = MonoBehaviour.Instantiate(AssetLoader.ME.Loader<GameObject>($"Prefabs/Paywalls/PaywallViewBase"), parent).AddComponent<PaywallView>();
 			view.transform.localPosition = localPosition;
 			view.Set(Required, seasonStr, FishRequiredLocalPosition);
-			
+
 			if (!TryOpen())
 				view.PlayAnimation(true);
 		}
+
+		public void ReleaseView() => view = null;
 
 		public void Refresh()
 		{

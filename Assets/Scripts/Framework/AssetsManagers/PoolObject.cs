@@ -3,7 +3,7 @@
 namespace Assets.Scripts.Framework.AssetsManagers
 {
 	public abstract class PoolObject<T>
-		where T : MonoBehaviour
+		where T : Component
 	{
 		public bool IsSpawned { get; private set; }
 		public T View { get; private set; }

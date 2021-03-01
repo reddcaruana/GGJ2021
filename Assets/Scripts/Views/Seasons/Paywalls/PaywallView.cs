@@ -59,6 +59,7 @@ namespace Assets.Scripts.Views.Seasons.Paywalls
 			mainSpriteFinal = AssetLoader.ME.Loader<Sprite>($"Sprites/Paywall/{seasonStr}/Paywall{seasonStr}Final");
 
 			mainSprite.sprite = mainSpriteFrames[0];
+			transform.localScale = Statics.VECTOR3_ONE;
 			transform.localScale = Statics.VECTOR3_ONE * (ViewController.Area.Width / mainSprite.bounds.size.x);
 		}
 
@@ -72,7 +73,7 @@ namespace Assets.Scripts.Views.Seasons.Paywalls
 
 		public void Finished()
 		{
-			mainSpriteFrames = null;
+			mainSpriteFrames = new Sprite[2];
 
 			mainSprite.sprite = mainSpriteFinal;
 			for (int i = 0; i < sprits.Length; i++)
