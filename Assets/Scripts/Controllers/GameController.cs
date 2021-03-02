@@ -4,6 +4,7 @@ using Assets.Scripts.Rods;
 using Assets.Scripts.Framework;
 using Assets.Scripts.Framework.Tools;
 using Assets.Scripts.Framework.Input;
+using Assets.Scripts.Framework.Ui.SafeArea;
 
 namespace Assets.Scripts.Controllers
 {
@@ -19,6 +20,8 @@ namespace Assets.Scripts.Controllers
 		{
 			QualitySettings.vSyncCount = 0;
 			Application.targetFrameRate = 60;
+
+			SafeAreaDetection.Init();
 
 			base.Awake();
 			MakePersistent();
@@ -82,8 +85,7 @@ namespace Assets.Scripts.Controllers
 
 			Vector3 filteredDirection = data.FilteredDirection();
 
-			if (!TryAccelerateBoat(filteredDirection, data) && !Rod.IsBusy)
-				ShowHideLogBook(filteredDirection);
+			TryAccelerateBoat(filteredDirection, data);
 		}
 
 		private bool TryAccelerateBoat(Vector3 filteredDirection, SwipeData data)
@@ -93,14 +95,6 @@ namespace Assets.Scripts.Controllers
 
 			ViewController.Accelerate(((data.Distance / data.Time) * filteredDirection.y) * 0.01f);
 			return true;
-		}
-
-		private void ShowHideLogBook(Vector3 filteredDirection)
-		{
-			if (filteredDirection.x == 0)
-				return;
-
-			ViewController.UiController.ShowHideLogBook(filteredDirection.x < 0);
 		}
 	}
 }

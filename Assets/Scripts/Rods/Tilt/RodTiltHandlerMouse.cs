@@ -7,6 +7,9 @@ namespace Assets.Scripts.Rods.Tilt
 {
 	public class RodTiltHandlerMouse : RodTiltHandler
 	{
+		protected override void InitInternal()
+		{
+		}
 
 		protected override void StartInternal()
 		{

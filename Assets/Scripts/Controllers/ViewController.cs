@@ -3,12 +3,11 @@ using Assets.Scripts.Utils;
 using Assets.Scripts.Player;
 using Assets.Scripts.Seasons;
 using Assets.Scripts.Constants;
+using Assets.Scripts.Factories;
 using Assets.Scripts.Framework;
 using Assets.Scripts.Framework.Input;
 using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.AquaticCreatures;
-using Assets.Scripts.AquaticCreatures.Fish;
-using Assets.Scripts.Factories;
 
 namespace Assets.Scripts.Controllers
 {

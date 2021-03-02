@@ -3,10 +3,10 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
-using Assets.Scripts.Framework.Utils;
-using Assets.Scripts.Framework.Utils.Data;
 using Assets.Scripts.Framework;
 using Assets.Scripts.Controllers;
+using Assets.Scripts.Framework.Utils;
+using Assets.Scripts.Framework.Utils.Data;
 
 namespace Assets.Scripts.Ui.Screens
 {

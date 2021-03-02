@@ -11,6 +11,10 @@ namespace Assets.Scripts.Rods.Tilt
 		// Calculated by calibration that 0.001 plus and minus the device is completely level
 		private const float SENSITIVITY = 6;
 
+		protected override void InitInternal()
+		{
+		}
+
 		protected override void StartInternal()
 		{
 			InputManager.EnableGyro(true);

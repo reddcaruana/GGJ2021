@@ -17,6 +17,8 @@ namespace Assets.Scripts.Rods.Tilt
 			this.tiltCenter = tiltCenter;
 		}
 
+		protected abstract void InitInternal();
+
 		public void Start()
 		{
 			IsActive = true;

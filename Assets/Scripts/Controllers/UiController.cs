@@ -4,6 +4,7 @@ using Assets.Scripts.Player;
 using Assets.Scripts.Ui.Screens;
 using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.AquaticCreatures.Fish;
+using Assets.Scripts.Framework.Ui.SafeArea;
 using static Assets.Scripts.Framework.Ui.RDUiTransitionAttachment;
 
 namespace Assets.Scripts.Controllers
@@ -13,18 +14,26 @@ namespace Assets.Scripts.Controllers
 		public bool IsMainMenu { get; private set; }
 
 		private Canvas canvas;
+		private SafeAreaPanel safeArea;
+
 		private MainMenuScreen mainMenuScreen;
 		private CaughtFishScreen caughtFishScreen;
 		private DebugScreen debugScreen;
 		private LogBookScreen logBookScreen;
+		private HUDScreen hudScreen;
 
 		public void Init()
 		{
 			canvas = GameObject.FindObjectOfType<Canvas>();
-			LoadMainMenuScreen();
-			LoadCaughtScreen();
+			new GameObject("SafeArea", typeof(RectTransform)).transform.SetParent(canvas.transform);
+			safeArea = canvas.transform.Find("SafeArea").gameObject.AddComponent<SafeAreaPanel>();
+
+			// Initialization determines overlay
 			LoadDebugScreen();
-			LoadlogBookScreen();
+			LoadCaughtScreen();
+			LoadHudScreen();
+			LoadMainMenuScreen();
+			LoadLogBookScreen();
 
 			ShowHideMainMenu(true);
 		}
@@ -32,12 +41,13 @@ namespace Assets.Scripts.Controllers
 		private void LoadMainMenuScreen() => LoadScreen(ref mainMenuScreen, "MainMenuScreen");
 		private void LoadCaughtScreen() => LoadScreen(ref caughtFishScreen, "CaughtFishScreen");
 		private void LoadDebugScreen() => LoadScreen(ref debugScreen, "DebugScreen");
-		private void LoadlogBookScreen() => LoadScreen(ref logBookScreen, "LogBookScreen");
+		private void LoadLogBookScreen() => LoadScreen(ref logBookScreen, "LogBookScreen");
+		private void LoadHudScreen() => LoadScreen(ref hudScreen, "HUDScreen");
 
 		private void LoadScreen<T>(ref T screen, string name) where T : ScreenBase
 		{
 			GameObject objPrefab = AssetLoader.ME.Loader<GameObject>("Prefabs/Ui/Screens/" + name);
-			screen = MonoBehaviour.Instantiate(objPrefab, canvas.transform).AddComponent<T>();
+			screen = MonoBehaviour.Instantiate(objPrefab, safeArea.transform).AddComponent<T>();
 		}
 
 		public void ShowHideMainMenu(bool value, Action onComplete = null)
@@ -46,6 +56,7 @@ namespace Assets.Scripts.Controllers
 			void OnComplete()
 			{
 				IsMainMenu = value;
+				ShowHideScreen(hudScreen, !IsMainMenu, null);
 				onComplete?.Invoke();
 			}
 

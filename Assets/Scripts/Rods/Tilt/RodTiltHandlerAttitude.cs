@@ -9,6 +9,11 @@ namespace Assets.Scripts.Rods.Tilt
 	{
 		private const float DEAD_ZONE_RIGHT = 10f;
 		private const float DEAD_ZONE_LEFT = 360f - DEAD_ZONE_RIGHT;
+
+		protected override void InitInternal()
+		{
+		}
+
 		protected override void StartInternal()
 		{
 			InputManager.EnableAttitude(true);
