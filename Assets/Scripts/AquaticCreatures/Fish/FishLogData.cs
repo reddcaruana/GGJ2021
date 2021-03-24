@@ -6,58 +6,67 @@ using Assets.Scripts.Constants;
 namespace Assets.Scripts.AquaticCreatures.Fish
 {
 	[Serializable]
-	public struct FishLogData
+	public class FishLogData : FishLogDataBase
 	{
 		[SerializeField] private SeasonAreaType season;
 		[SerializeField] private string seasonStr;
-		[SerializeField] private FishTypeData type;
 		[SerializeField] private float weight;
-		[SerializeField] private DateTime date;
-		[SerializeField] private uint total;
+		[SerializeField] private string date;
+		[SerializeField] private Rarity rarity;
+		[SerializeField] private uint shiny;
+		[SerializeField] private bool seenInlogBook;
 
 		public SeasonAreaType Season => season;
 		public string SeasonStr => seasonStr;
-		public FishTypeData Type => type;
 		public float Weight => weight;
-		public DateTime Date => date;
-		public uint Total => total;
+		public string Date => date;
+		public Rarity Rarity => rarity;
+		public uint Shiny => shiny;
+		public bool SeenInLogBook => seenInlogBook;
 
-		public FishLogData(IAquaticCreature controller, Season season) :
-			this(controller, season, 1)
+		public FishLogData(IAquaticCreature controller, Season season, uint shiny) :
+			this(controller, season, 1, shiny)
 		{
 		}
 
-		public FishLogData(IAquaticCreature controller, Season season, uint total) : 
-			this(season.Type, season.NiceName, controller.Data.Type, controller.Weight, DateTime.Now, total)
+		public FishLogData(IAquaticCreature controller, Season season, uint total, uint shiny) : 
+			this(season.Type, season.NiceName, controller.Data.Type, controller.Weight, DateTime.Now.ToString(), total, controller.Data.Rarity, shiny)
 		{
 		}
 
-		public FishLogData(SeasonAreaType season, string seasonStr, FishTypeData type, float weight, DateTime date, uint total)
+		public FishLogData(SeasonAreaType season, string seasonStr, FishTypeData type, float weight, string date, uint total, Rarity rarity, uint shiny) : base(type, total)
 		{
 			this.season = season;
 			this.seasonStr = seasonStr;
-			this.type = type;
 			this.weight = weight;
-			this.date = date;
-			this.total = total;
+			this.date = date.ToString();
+			this.rarity = rarity;
+			this.shiny = shiny;
+			seenInlogBook = false;
 		}
 
+		public void MarkAsSeenInLogBook() => seenInlogBook = true;
 
-		public string ToJson() => JsonUtility.ToJson(this);
-
-		public static FishLogData FromJson(string json) => JsonUtility.FromJson<FishLogData>(json);
+		public static new FishLogData FromJson(string json) => JsonUtility.FromJson<FishLogData>(json);
 		
-		public static bool TryBest(FishLogData a, FishLogData b, out FishLogData best)
+		public override bool TryCombine(FishLogDataBase b)
 		{
-			if (a.Type.Type != b.Type.Type)
-			{
-				best = default;
+			if (!base.TryCombine(b))
 				return false;
+
+			FishLogData nB = (FishLogData)b;
+			// This B is better
+			if (weight < nB.weight)
+			{
+				weight = nB.weight;
+				date = nB.date;
 			}
 
-			FishLogData c = a.weight > b.weight ? a : b;
+			shiny += nB.shiny;
+			
+			if (nB.SeenInLogBook)
+				MarkAsSeenInLogBook();
 
-			best = new FishLogData(c.Season, c.SeasonStr, c.Type, c.Weight, c.Date, a.Total + b.Total);
 			return true;
 		}
 	}

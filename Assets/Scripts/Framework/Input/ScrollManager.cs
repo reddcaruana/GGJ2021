@@ -6,6 +6,7 @@ namespace Assets.Scripts.Framework.Input
 	public class ScrollManager
 	{
 		private const float TRASH_HOLD_TIME_MIN = 0.2f;
+		private const float TRASH_HOLD_DISTANCE = 0.1f;
 
 		private Vector3 startWorldPosition;
 		private float startTime;
@@ -37,7 +38,7 @@ namespace Assets.Scripts.Framework.Input
 			if (!IsScrolling)
 			{
 				float deltaTime = Time.time - startTime;
-				if (deltaTime <= TRASH_HOLD_TIME_MIN)
+				if (deltaTime <= TRASH_HOLD_TIME_MIN && Vector3.Distance(startWorldPosition, worldPosition) < TRASH_HOLD_DISTANCE)
 					return;
 				else
 				{

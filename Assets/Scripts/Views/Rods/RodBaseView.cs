@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using DG.Tweening;
-using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
+using Assets.Scripts.Framework.AssetsManagers;
 
 namespace Assets.Scripts.Views.Rods
 {
@@ -36,17 +36,17 @@ namespace Assets.Scripts.Views.Rods
 			lineStartCurrentLocalPosition = lineStartLocalPosition;
 			lineStartTransform.localPosition = lineStartLocalPosition;
 
-			spriteRenderer.sprite = AssetLoader.ME.Loader<Sprite>($"Sprites/Rods/Rod{typeStr}");
+			spriteRenderer.sprite = AssetLoader.ME.Load<Sprite>($"Sprites/Rods/Rod{typeStr}");
 
 			Vector3 localPos = new Vector3();
 			localPos.y += (spriteRenderer.bounds.size.y / 2f) + REEL_PADDING;
 			spriteRenderer.transform.localPosition = localPos;
 		}
-
 		public void SetPosition(Vector3 worldPosition) => transform.position = worldPosition;
 
 		public void Rotate(float angle, float duration, bool flip = false)
 		{
+			pivotTransform.DOKill();
 			spriteRenderer.flipX = flip;
 			lineStartCurrentLocalPosition.x = flip ? -lineStartLocalPositionX : lineStartLocalPositionX;
 			lineStartTransform.localPosition = lineStartCurrentLocalPosition;

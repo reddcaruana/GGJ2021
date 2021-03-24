@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using Assets.Scripts.Rods;
-using Assets.Scripts.Framework;
+using Assets.Scripts.Boats;
 using Assets.Scripts.Framework.Tools;
 using Assets.Scripts.Framework.Input;
 using Assets.Scripts.Framework.Ui.SafeArea;
@@ -10,6 +10,11 @@ namespace Assets.Scripts.Controllers
 {
 	public class GameController : RDMonobehaviourSingleton<GameController>
 	{
+		public bool IsPaused { get; set; }
+		public bool CanClick { get; set; } = true;
+		public bool CanDrag { get; set; } = true;
+
+		public Boat Boat { get; private set; }
 		public RodBase Rod { get; private set; }
 		public bool IsDragging { get; private set; }
 
@@ -18,13 +23,14 @@ namespace Assets.Scripts.Controllers
 
 		protected override void Awake()
 		{
+			base.Awake();
+			MakePersistent();
+
 			QualitySettings.vSyncCount = 0;
 			Application.targetFrameRate = 60;
 
+			GamePausableTime.Init();
 			SafeAreaDetection.Init();
-
-			base.Awake();
-			MakePersistent();
 
 			GameFactory.Start();
 		}
@@ -33,8 +39,11 @@ namespace Assets.Scripts.Controllers
 		{
 			ViewController.Init();
 
+			Boat = new Boat();
+			Boat.CreateView(ViewController.MainCamera.transform);
+
 			Rod = new BasicRod();
-			Rod.CreateView(ViewController.MainCamera.transform.Find("Boat"));
+			Rod.CreateView(Boat.View.transform);
 			Rod.RegisterToOnCastComnplete(ViewController.OnCast);
 
 			InputManager.onClickPosition += OnClick;
@@ -42,6 +51,9 @@ namespace Assets.Scripts.Controllers
 			InputManager.onDragStart += OnDragStart;
 			InputManager.onDrag += OnDrag;
 			InputManager.onDragEnd += OnDragEnd;
+
+			if (!TutorialController.HasCompletedTutorials())
+				new TutorialController().Init();
 		}
 
 		private void Update()
@@ -60,19 +72,25 @@ namespace Assets.Scripts.Controllers
 
 		private void OnClick(Vector3 worldPosition)
 		{
+			if (!CanClick)
+				return;
+
 			Rod.ReelIn();
 			Rod.TryCast(worldPosition);
 		}
 
 		private void OnDragStart(DragData data)
 		{
+			if (!CanDrag || Rod.InReserverdArea(data.WorldStartPosition))
+				return;
+
 			IsDragging = true;
 			ViewController.FollowStart();
 		}
 
 		private void OnDrag(DragData data)
 		{
-			if (data.FilteredDirection().y == 0)
+			if (!CanDrag || data.FilteredDirection().y == 0)
 				return;
 
 			ViewController.FollowUpdate(data.AxisDistance.y * -1);
@@ -80,7 +98,11 @@ namespace Assets.Scripts.Controllers
 
 		private void OnDragEnd(SwipeData data)
 		{
+			if (!CanDrag)
+				return;
+
 			IsDragging = false;
+
 			ViewController.FollowStop();
 
 			Vector3 filteredDirection = data.FilteredDirection();
@@ -95,6 +117,12 @@ namespace Assets.Scripts.Controllers
 
 			ViewController.Accelerate(((data.Distance / data.Time) * filteredDirection.y) * 0.01f);
 			return true;
+		}
+
+		public void SetActiveInteractions(bool value)
+		{
+			CanClick = value;
+			CanDrag = value;
 		}
 	}
 }

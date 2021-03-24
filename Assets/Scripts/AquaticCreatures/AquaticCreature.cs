@@ -23,8 +23,8 @@ namespace Assets.Scripts.AquaticCreatures
 		{
 			Data = data;
 			Weight = Data.GetRandomWeight();
-			Size = Weight * FishWiki.SIZE_PER_WEIGHT_RATIO;
-			Energy = new Energy((Weight / Data.IdealWeight()) * Data.BaseEnergy, 0.3f);
+			Size = FishWiki.SizeCalculator(Weight);
+			Energy = new Energy((Weight / Data.IdealWeight()) * Data.BaseEnergy, 0.5f);
 
 			SetInternal();
 
@@ -69,7 +69,7 @@ namespace Assets.Scripts.AquaticCreatures
 
 		public FishLogData Caught()
 		{
-			FishLogData data = new FishLogData(this, ViewController.CurrentSeason);
+			FishLogData data = new FishLogData(this, ViewController.CurrentSeason, (uint)(Random.value <= FishWiki.SHINY_CHANCE ? 1 : 0));
 			CaughtInternal();
 			return data;
 		}

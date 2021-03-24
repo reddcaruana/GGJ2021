@@ -2,9 +2,9 @@
 using DG.Tweening;
 using UnityEngine;
 using Assets.Scripts.Framework;
-using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Tools;
 using Assets.Scripts.Framework.Utils;
+using Assets.Scripts.Framework.AssetsManagers;
 using LoopType = Assets.Scripts.Framework.Tools.LoopType;
 
 namespace Assets.Scripts.Views.Rods
@@ -35,13 +35,13 @@ namespace Assets.Scripts.Views.Rods
 			spriteRenderer = transform.Find("SpriteRodFloat").GetComponent<SpriteRenderer>();
 
 			for (int i = 0; i < floatingSprites.Length; i++)
-				floatingSprites[i] = AssetLoader.ME.Loader<Sprite>($"Sprites/RodFloat/Floating/floating{i + 1}");
+				floatingSprites[i] = AssetLoader.ME.Load<Sprite>($"Sprites/RodFloat/Floating/floating{i + 1}");
 
 			for (int i = 0; i < nibbleSprites.Length; i++)
-				nibbleSprites[i] = AssetLoader.ME.Loader<Sprite>($"Sprites/RodFloat/Nibble/floatnibble{i + 1}");
+				nibbleSprites[i] = AssetLoader.ME.Load<Sprite>($"Sprites/RodFloat/Nibble/floatnibble{i + 1}");
 
 			for (int i = 0; i < splashSprites.Length; i++)
-				splashSprites[i] = AssetLoader.ME.Loader<Sprite>($"Sprites/RodFloat/Splash/splash{i + 1}");
+				splashSprites[i] = AssetLoader.ME.Load<Sprite>($"Sprites/RodFloat/Splash/splash{i + 1}");
 
 			animator = new RDAnimator(floatingSprites.Length, OnFrameUpdate);
 			spriteRenderer.sprite = floatingSprites[0];

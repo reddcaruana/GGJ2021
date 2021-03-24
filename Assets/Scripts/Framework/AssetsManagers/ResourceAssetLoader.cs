@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 
-namespace Assets.Scripts.AssetsManagers
+namespace Assets.Scripts.Framework.AssetsManagers
 {
 	public class ResourceAssetLoader : AssetLoader
 	{
-		public override T Loader<T>(string path) 
+		public override T Load<T>(string path) 
 		{
 			T t = Resources.Load<T>(path);
 

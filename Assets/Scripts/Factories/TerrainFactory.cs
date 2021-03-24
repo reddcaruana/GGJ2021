@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Assets.Scripts.Seasons;
 using System.Collections.Generic;
-using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.AssetsManagers;
 
 namespace Assets.Scripts.Factories
@@ -70,7 +69,7 @@ namespace Assets.Scripts.Factories
 
 		private TerrainViewPoolObject SpawnBase(TerrainViewPoolObject terrain, SpriteRenderer waterSurfaceSpriteRend, string typeStr)
 		{
-			Sprite terrainSprite = AssetLoader.ME.Loader<Sprite>($"Sprites/Terrain/Terrain{typeStr}");
+			Sprite terrainSprite = AssetLoader.ME.Load<Sprite>($"Sprites/Terrain/Terrain{typeStr}");
 			terrain.SpawnBase(waterSurfaceSpriteRend, terrainSprite);
 			return terrain;
 		}

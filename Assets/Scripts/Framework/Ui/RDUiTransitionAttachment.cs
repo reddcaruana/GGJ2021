@@ -35,16 +35,16 @@ namespace Assets.Scripts.Framework.Ui
 			}
 		}
 
-		public void Show(Action onComplete = null) =>
+		public bool Show(Action onComplete = null) =>
 			ShowOrHide(State.Visible, State.ShowTransition, State.HideTransition, showPos, showTime, onComplete);
 
-		public void Hide(Action onComplete = null) =>
+		public bool Hide(Action onComplete = null) =>
 			ShowOrHide(State.Hidden, State.HideTransition, State.ShowTransition, hidePos, hideTime, onComplete);
 
-		private void ShowOrHide(State targetState, State targetTransitionState, State oppositeTransitionState, Vector2 targetPos, float time, Action onComplete)
+		private bool ShowOrHide(State targetState, State targetTransitionState, State oppositeTransitionState, Vector2 targetPos, float time, Action onComplete)
 		{
 			if (CurrentState == targetState || CurrentState == targetTransitionState)
-				return;
+				return false;
 
 			if (CurrentState == oppositeTransitionState)
 				StopCurrentTransition();
@@ -60,15 +60,17 @@ namespace Assets.Scripts.Framework.Ui
 				{
 					OnDoneTransition(targetState, onComplete);
 				});
+
+			return true;
 		}
 
-		public void ShowInstantly() => ShowOrHideInstantly(State.Visible, showPos);
-		public void HideInstantly() => ShowOrHideInstantly(State.Hidden, hidePos);
+		public bool ShowInstantly() => ShowOrHideInstantly(State.Visible, showPos);
+		public bool HideInstantly() => ShowOrHideInstantly(State.Hidden, hidePos);
 
-		private void ShowOrHideInstantly(State targetState, Vector2 targetPos)
+		private bool ShowOrHideInstantly(State targetState, Vector2 targetPos)
 		{
 			if (CurrentState == targetState)
-				return;
+				return false;
 
 			StopCurrentTransition();
 
@@ -76,6 +78,7 @@ namespace Assets.Scripts.Framework.Ui
 				rectTransform.anchoredPosition = targetPos;
 			
 			OnDoneTransition(targetState, null);
+			return true;
 		}
 
 		protected virtual void OnStartTransition()

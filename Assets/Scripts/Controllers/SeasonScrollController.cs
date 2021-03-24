@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using DG.Tweening;
+using UnityEngine;
 using Assets.Scripts.Seasons;
 using Assets.Scripts.Views.Seasons;
-using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.Framework.Tools;
+using Assets.Scripts.Framework.AssetsManagers;
 
 namespace Assets.Scripts.Controllers
 {
@@ -28,22 +30,25 @@ namespace Assets.Scripts.Controllers
 		private const float FOLLOW_TRASH_HOLD = 0.01f;
 		private const float FOLLOW_FACTOR = 0.1f;
 
-		public bool IsMoving => acceleration.IsMoving || IsFollowing;
-
 		private readonly RDAccelerationModule acceleration;
 		private readonly SeasonView[] seasonViews = new SeasonView[2];
+		public bool IsMoving => acceleration.IsMoving || IsFollowing;
+
+		private Area2D PayWallNotificationArea;
 
 		private int currentViewIndex = 0;
 		private int NextViewIndex => MathUtils.LoopIndex(currentViewIndex + 1, seasonViews.Length);
 		private Season otherSeason;
 
-		private bool IsFollowing => GameController.ME.IsDragging && ViewController.CanMove();
+		public bool IsFollowing => GameController.ME.IsDragging && ViewController.CanMove();
 		private Vector3 followWorldTarget;
 
 		public SeasonScrollController()
 		{
 			Vector3 boatWorldPosition = ViewController.MainCamera.transform.position;
 			boatWorldPosition.y -= ViewController.Area.HalfHeight;
+
+
 
 			acceleration = new RDAccelerationModule(MoveUpdate, GetWorldPosition);
 			acceleration.SetBounds(CheckPosition);
@@ -52,7 +57,13 @@ namespace Assets.Scripts.Controllers
 
 		public void Init()
 		{
-			SeasonView prefab = AssetLoader.ME.Loader<SeasonView>("Prefabs/Seasons/SeasonView");
+			PayWallNotificationArea = new Area2D(
+				width: ViewController.Area.Width,
+				height: ViewController.Area.Height * 0.05f,
+				center: new Vector2(0, ViewController.Area.HalfHeight - (ViewController.Area.Height * 0.1f)));
+			RDebugUtils.CreateRectangularDebugAreaView(PayWallNotificationArea, new Color(1f,0f,1f,0.4f), "PayWallnotificationArea", 5, ViewController.MainCamera.transform);
+
+			SeasonView prefab = AssetLoader.ME.Load<SeasonView>("Prefabs/Seasons/SeasonView");
 
 			seasonViews[0] = MonoBehaviour.Instantiate(prefab, ViewController.MainParent);
 			seasonViews[1] = MonoBehaviour.Instantiate(prefab, ViewController.MainParent);
@@ -66,7 +77,7 @@ namespace Assets.Scripts.Controllers
 			followWorldTarget = seasonViews[currentViewIndex].transform.position;
 		}
 
-		public void FolllowStart()
+		public void FollowStart()
 		{
 			if (!ViewController.TryResetRodAndMove())
 				return;
@@ -75,7 +86,11 @@ namespace Assets.Scripts.Controllers
 			followWorldTarget = seasonViews[currentViewIndex].transform.position;
 		}
 
-		public void FollowStop() => acceleration.IsActive = true;
+		public void FollowStop()
+		{
+			acceleration.ResetSpeed();
+			acceleration.IsActive = true;
+		}
 
 		public void FollowUpdate(float followDistance)
 		{
@@ -121,9 +136,18 @@ namespace Assets.Scripts.Controllers
 			{
 				Vector3 currentPos = seasonViews[NextViewIndex].transform.position;
 				newPosition = seasonViews[currentViewIndex].transform.position + (newPosition - currentPos);
+
+				if (IsFollowing)
+				{
+					float followDistance = newPosition.y - followWorldTarget.y;
+					followWorldTarget = newPosition;
+					followWorldTarget.y += followDistance;
+				}
 			}
 
 			TryLoadUpcomingSeasonView(newPosition);
+
+			TryPayWallNotification(newPosition);
 
 			return newPosition;
 		}
@@ -171,7 +195,7 @@ namespace Assets.Scripts.Controllers
 			bool isPrev;
 
 			if (seasonViews[currentViewIndex].transform.position.y > seasonViews[nextSeasonViewIndex].transform.position.y &&
-				seasonViews[nextSeasonViewIndex].GetTopWorldPosition().y > 0)
+				seasonViews[nextSeasonViewIndex].GetTopWorldPosition().y > ViewController.Area.HalfHeight)
 			{
 				isPrev = true;
 			}
@@ -224,6 +248,51 @@ namespace Assets.Scripts.Controllers
 				otherSeason.ReleaseViews();
 				otherSeason = upcomingSeason;
 				upcomingSeason.AssignView(seasonViews[nextSeasonIndex], basePosition);
+			}
+		}
+
+		private void TryPayWallNotification(Vector3 newPosition) 
+		{
+			if (MathUtils.IsInRectArea(PayWallNotificationArea, seasonViews[currentViewIndex].GetTopWorldPosition(newPosition)))
+			{
+				ViewController.CurrentSeason.PayWall.TryNotify();
+			}
+		}
+
+		public float AutoScrollToPayWall(float duration = 2f, Action<float> onComplete = null)
+		{
+			Vector3 currentPos = seasonViews[currentViewIndex].transform.position;
+			float targetPos = currentPos.y - seasonViews[currentViewIndex].GetTopWorldPosition().y;
+
+			float initYPos = currentPos.y;
+			float seasonBottomY = seasonViews[currentViewIndex].GetBottomWorldPosition().y;
+			if (seasonBottomY > ViewController.ScreenBottom.y)
+				initYPos -= seasonBottomY - ViewController.ScreenBottom.y;
+
+			AutoScrollToPosition(targetPos, duration, OnComplete);
+			void OnComplete() => onComplete?.Invoke(initYPos);
+
+			return initYPos;
+		}
+
+		public void AutoScrollToPosition(float target, float duration = 2f, Action onComplete = null)
+		{
+			FollowStart();
+
+			Vector3 currentPos = seasonViews[currentViewIndex].transform.position;
+
+			DOTween.To(() => currentPos.y, (x) =>
+			{
+				currentPos.y = x;
+				MoveUpdate(CheckPosition(currentPos));
+
+			}, target, duration).SetEase(Ease.InOutQuad).
+			onComplete = OnComplete;
+
+			void OnComplete()
+			{
+				FollowStop();
+				onComplete?.Invoke();
 			}
 		}
 	}

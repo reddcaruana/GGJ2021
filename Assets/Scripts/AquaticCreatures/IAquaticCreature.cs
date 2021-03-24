@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Assets.Scripts.AquaticCreatures.Fish;
+using Assets.Scripts.Generic;
 
 namespace Assets.Scripts.AquaticCreatures
 {
@@ -8,8 +9,10 @@ namespace Assets.Scripts.AquaticCreatures
 		FishData Data { get; }
 		float Weight { get; }
 		float Size { get; }
+		Energy Energy { get; }
 		bool IsReadyToSet { get; } 
 		bool CanCatch { get; }
+
 		void Set(FishData data);
 		Vector3 GetLocalSpawnPosition();
 		Vector3 GetViewWorldPosition();

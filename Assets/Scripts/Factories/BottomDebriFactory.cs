@@ -4,7 +4,6 @@ using Assets.Scripts.Framework;
 using Assets.Scripts.Controllers;
 using System.Collections.Generic;
 using Assets.Scripts.Views.Seasons;
-using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.Framework.AssetsManagers;
 
@@ -71,7 +70,7 @@ namespace Assets.Scripts.Factories
 			int debriSpriteIndex = Random.Range(0, DebriArray.Length);
 
 			if (SpriteArray[debriSpriteIndex] == null)
-				SpriteArray[debriSpriteIndex] = AssetLoader.ME.Loader<Sprite>("Sprites/BottomDebri/" + DebriArray[debriSpriteIndex]);
+				SpriteArray[debriSpriteIndex] = AssetLoader.ME.Load<Sprite>("Sprites/BottomDebri/" + DebriArray[debriSpriteIndex]);
 
 			return SpriteArray[debriSpriteIndex];
 		}

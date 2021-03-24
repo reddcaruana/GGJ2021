@@ -1,12 +1,11 @@
 ﻿using System;
 using UnityEngine;
-using Assets.Scripts.Utils;
 using Assets.Scripts.Constants;
 using Assets.Scripts.Framework;
-using Assets.Scripts.Controllers;
-using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.Factories;
+using Assets.Scripts.Controllers;
 using Random = UnityEngine.Random;
+using Assets.Scripts.Framework.Utils;
 
 namespace Assets.Scripts.AquaticCreatures.Fish
 {
@@ -22,7 +21,8 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		private Vector3 spawnLocalPosition;
 
 		public bool HasView => view != null;
-		private FishViewPoolObject view; 
+		private FishViewPoolObject view;
+		private Coroutine coolDownCoroutine;
 
 		protected override void SetInternal()
 		{
@@ -47,6 +47,12 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		{
 			if (!HasView)
 				return;
+
+			if (coolDownCoroutine != null)
+			{
+				CoroutineRunner.HaltCoroutine(coolDownCoroutine);
+				coolDownCoroutine = null;
+			}
 
 			view.Despawn();
 			view = null;
@@ -116,11 +122,13 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 
 		private void SpawnCoolDown()
 		{
-			CoroutineRunner.Wait(Random.Range(COOL_DOWN_MIN, COOL_DOWN_MAX), OnCoolDownComplete);
+			coolDownCoroutine = CoroutineRunner.Wait(Random.Range(COOL_DOWN_MIN, COOL_DOWN_MAX), OnCoolDownComplete);
 
 			void OnCoolDownComplete()
 			{
-				if (IsBaotFear())
+				coolDownCoroutine = null;
+
+				if (IsBoatFear())
 				{
 					SpawnCoolDown();
 					return;
@@ -192,12 +200,20 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 
 		public void FearOfBoats()
 		{
-			if (IsBaotFear())
+			if (IsBoatFear())
 				Escape();
 		}
 
-		public bool IsBaotFear() =>
+		public bool IsBoatFear() =>
+			!SeasonCinematicController.IsCinematic &&
 			MathUtils.AreCirclesOverlaping(ViewController.ScreenBottom, SeasonScrollController.FEAR_OF_THE_BOAT, view.View.transform.position, proximityBite);
+
+		public Vector3 GetTutorialCastPosition()
+		{
+			Vector3 result = GetLocalSpawnPosition();
+			result.y -= (proximityFear / 2f) + (proximityBite / 4f);
+			return view.View.transform.parent.TransformPoint(result);
+		}
 
 		[System.Diagnostics.Conditional("RDEBUG")]
 		private void DebugAreaView()
@@ -207,10 +223,10 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 
 			Color color = Color.yellow;
 			color.a = 0.4f;
-			DebugUtils.CreateDebugAreaView(proximityFear, color, "Fear", -1, view.View.transform);
+			RDebugUtils.CreateCircularDebugAreaView(proximityFear, color, "Fear", -1, view.View.transform);
 			color = Color.green;
 			color.a = 0.4f;
-			DebugUtils.CreateDebugAreaView(proximityBite, color, "Bite", -2, view.View.transform);
+			RDebugUtils.CreateCircularDebugAreaView(proximityBite, color, "Bite", -2, view.View.transform);
 		}
 
 		[System.Diagnostics.Conditional("RDEBUG")]

@@ -7,9 +7,9 @@ namespace Assets.Scripts.Rods.Tilt
 		public static RodTiltHandler Create()
 		{
 			if (Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer)
-				return new RodTiltHandlerGyro();
+				return new RodTiltHandlerTouch();
 			else
-				return new RodTiltHandlerMouse();
+				return new RodTiltHandlerTouch();
 		}
 	}
 }

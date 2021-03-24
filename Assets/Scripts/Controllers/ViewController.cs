@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using Assets.Scripts.Utils;
 using Assets.Scripts.Player;
 using Assets.Scripts.Seasons;
 using Assets.Scripts.Constants;
@@ -8,25 +7,28 @@ using Assets.Scripts.Framework;
 using Assets.Scripts.Framework.Input;
 using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.AquaticCreatures;
+using System;
+using Assets.Scripts.Ui.Screens;
 
 namespace Assets.Scripts.Controllers
 {
 	public static class ViewController
 	{
 		public static Camera MainCamera = Camera.main;
+
 		public static readonly Area2D Area;
 		public static readonly Vector2 ScreenTop;
 		public static readonly Vector2 ScreenBottom;
-
 
 		public static readonly UiController UiController = new UiController();
 
 		public static Transform MainParent;
 
+		public static bool IsFollowing => SeasonScrollController.IsFollowing;
 		public static Season CurrentSeason => seasons[seasonIdex];
-		private static int seasonIdex = 0;
+		private static int seasonIdex = (int)PlayerData.SeasonData.LastSeasonVisited.Value;
 		private static Season[] seasons = new Season[(int)SeasonAreaType.MAX];
-		private static SeasonScrollController seasonScrollController = new SeasonScrollController();
+		private static readonly SeasonScrollController SeasonScrollController = new SeasonScrollController();
 
 		static ViewController()
 		{
@@ -55,7 +57,7 @@ namespace Assets.Scripts.Controllers
 			FactoryManager.Stream.Init(8);
 			FactoryManager.Terrain.Init(500);
 
-			seasonScrollController.Init();
+			SeasonScrollController.Init();
 			UiController.Init();
 
 			InputManager.Init(MainCamera);
@@ -76,12 +78,17 @@ namespace Assets.Scripts.Controllers
 
 		public static void NextSeason() => MoveSeason(1);
 		public static void PrevSeason() => MoveSeason(-1);
-		private static void MoveSeason(int direction) => seasonIdex = MathUtils.LoopIndex(seasonIdex + direction, seasons.Length);
+		private static void MoveSeason(int direction)
+		{
+			seasonIdex = MathUtils.LoopIndex(seasonIdex + direction, seasons.Length);
+			PlayerData.SeasonData.LastSeasonVisited.Value = seasons[seasonIdex].Type;
+			SeasonCinematicController.TrySeasonIntro();
+		}
 
 		public static bool CanCast(Vector3 worldPosition)
 		{
-			// Check if boat is moving
-			if (UiController.IsMainMenu || seasonScrollController.IsMoving)
+			// Check if a Screen is active or boat is moving
+			if (ScreenManager.ME.IsAScreenActive || SeasonScrollController.IsMoving || SeasonCinematicController.IsCinematic)
 				return false;
 
 			if (!CurrentSeason.ValidatePosition(worldPosition))
@@ -89,13 +96,13 @@ namespace Assets.Scripts.Controllers
 				if (!PeekNextSeason().ValidatePosition(worldPosition))
 				{
 					if (PeekPrevSeason().ValidatePosition(worldPosition) &&
-						PlayerData.LastSeasonUnlocked >= PeekPrevSeason().Type)
+						PlayerData.SeasonData.LastSeasonUnlocked.Value >= PeekPrevSeason().Type)
 					{
 						PrevSeason();
 						return true;
 					}
 				}
-				else if (PlayerData.LastSeasonUnlocked >= PeekNextSeason().Type)
+				else if (PlayerData.SeasonData.LastSeasonUnlocked.Value >= PeekNextSeason().Type)
 				{
 					NextSeason();
 					return true;
@@ -104,7 +111,7 @@ namespace Assets.Scripts.Controllers
 			else
 				return true;
 
-			DebugUtils.Log("Cant Cast There ........./Z X");
+			RDebugUtils.Log("Cant Cast There ........./Z X");
 			return false;
 		}
 
@@ -118,18 +125,52 @@ namespace Assets.Scripts.Controllers
 
 		public static bool CanMove()
 		{
-			if (UiController.IsMainMenu)
+			if (ScreenManager.ME.IsAScreenActive || GameController.ME.Rod.IsBusy || SeasonCinematicController.IsCinematic)
 				return false;
 
-			if (!GameController.ME.Rod.IsBusy)
-				return true;
-
-			return false;
+			return true;
 		}
 
-		public static void FollowStart() => seasonScrollController.FolllowStart();
-		public static void FollowUpdate(float followDistrance) => seasonScrollController.FollowUpdate(followDistrance);
-		public static void FollowStop() => seasonScrollController.FollowStop();
-		public static void Accelerate(float speed) => seasonScrollController.SetSpeed(speed);
+		public static void FollowStart() => SeasonScrollController.FollowStart();
+		public static void FollowUpdate(float followDistrance) => SeasonScrollController.FollowUpdate(followDistrance);
+		public static void FollowStop() => SeasonScrollController.FollowStop();
+		public static void Accelerate(float speed) => SeasonScrollController.SetSpeed(speed);
+
+		public static void MakeSeasonIntro(Action onComplete = null) => MoveToPayWallAndBack(onComplete);
+
+		public static void MakeSeasonOutro(Action onComplete = null) => MoveToPayWallAndBack(onComplete);
+
+		public static void MoveToPayWall(Action<float> onComplete)
+		{
+			CoroutineRunner.Wait(0.5f, () =>
+			{
+				// Hide Boat
+				GameController.ME.Boat.View.Hide(0.5f);
+				// Scroll Seasons Till Paywall
+				SeasonScrollController.AutoScrollToPayWall(onComplete: onComplete);
+			});
+		}
+
+		public static void MoveBackFromPaywall(float initYPos, Action onComplete)
+		{
+			// Scroll Back to initial Position
+			SeasonScrollController.AutoScrollToPosition(initYPos, onComplete: onComplete);
+			CoroutineRunner.Wait(1.5f, onComplete: () =>
+			{
+				GameController.ME.Boat.View.Show(0.5f);
+			});
+		}
+
+		private static void MoveToPayWallAndBack(Action onComplete)
+		{
+			MoveToPayWall(onComplete: (initYPos) =>
+			{
+				// Wait For Seconds
+				CoroutineRunner.Wait(2f, onComplete: () =>
+				{
+					MoveBackFromPaywall(initYPos, onComplete);
+				});
+			});
+		}
 	}
 }

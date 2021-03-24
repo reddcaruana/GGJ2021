@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace Assets.Scripts.Rods.Tilt
 {
@@ -15,6 +16,8 @@ namespace Assets.Scripts.Rods.Tilt
 			this.tiltLeft = tiltLeft;
 			this.tiltRight = tiltRight;
 			this.tiltCenter = tiltCenter;
+
+			InitInternal();
 		}
 
 		protected abstract void InitInternal();
@@ -34,5 +37,7 @@ namespace Assets.Scripts.Rods.Tilt
 		}
 
 		protected abstract void StopInternal();
+
+		public abstract bool InReservedArea(Vector3 worldPosition);
 	}
 }

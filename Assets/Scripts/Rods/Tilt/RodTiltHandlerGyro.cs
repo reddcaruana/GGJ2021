@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Assets.Scripts.Utils;
 using Assets.Scripts.Framework.Input;
 using Assets.Scripts.Framework.Utils;
 
@@ -59,7 +58,7 @@ namespace Assets.Scripts.Rods.Tilt
 
 		private IEnumerator CalibrationCoroutine()
 		{
-			DebugUtils.Log("Starting Calibration");
+			RDebugUtils.Log("Starting Calibration");
 
 			InputManager.EnableGyro(true);
 
@@ -86,7 +85,9 @@ namespace Assets.Scripts.Rods.Tilt
 
 			InputManager.EnableGyro(false);
 
-			DebugUtils.Log($"Done Calibration. H: {VectorUtils.Print(highestValues)}, L: {VectorUtils.Print(lowestValues)}");
+			RDebugUtils.Log($"Done Calibration. H: {VectorUtils.Print(highestValues)}, L: {VectorUtils.Print(lowestValues)}");
 		}
+
+		public override bool InReservedArea(Vector3 worldPosition) => false;
 	}
 }

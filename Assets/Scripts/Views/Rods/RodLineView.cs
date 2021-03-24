@@ -1,11 +1,12 @@
-﻿using UnityEngine;
-using System;
+﻿using System;
 using DG.Tweening;
+using UnityEngine;
 using Assets.Scripts.Rods;
 using Assets.Scripts.Framework;
-using Assets.Scripts.AssetsManagers;
+using Assets.Scripts.Constants;
 using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.Framework.Tools;
+using Assets.Scripts.Framework.AssetsManagers;
 
 namespace Assets.Scripts.Views.Rods
 {
@@ -13,9 +14,22 @@ namespace Assets.Scripts.Views.Rods
 	{
 		private Action onLineSnapComplete;
 		private RDAnimator animator;
-		private readonly Sprite[] lineSnapSprites = new Sprite[13];
+		private static readonly Sprite[] lineSnapSprites = new Sprite[13];
 
 		private Transform transformGrp;
+
+		public void DisplayInUi()
+		{
+			rodSideSnapSpriteRenderer.sortingLayerID =
+				fishSideSnapSpriteRenderer.sortingLayerID = GameStatics.UI_SORTING_LAYER;
+
+			rodSideSnapSpriteRenderer.transform.localScale =
+				fishSideSnapSpriteRenderer.transform.localScale = Vector3.one * 150f;
+			progressBarView.DisplayInUi();
+
+			transformGrpScale.x = 110f;
+		}
+
 		private Vector3 transformGrpRotation = new Vector3();
 		private Vector3 transformGrpScale = Vector3.one;
 
@@ -27,8 +41,11 @@ namespace Assets.Scripts.Views.Rods
 
 		public void Awake()
 		{
-			for (int i = 0; i < lineSnapSprites.Length; i++)
-				lineSnapSprites[i] = AssetLoader.ME.Loader<Sprite>("Sprites/RodLine/Xlief" + i);
+			if (lineSnapSprites[0] == null)
+			{
+				for (int i = 0; i < lineSnapSprites.Length; i++)
+					lineSnapSprites[i] = AssetLoader.ME.Load<Sprite>("Sprites/RodLine/Xlief" + i);
+			}
 
 			animator = new RDAnimator(lineSnapSprites.Length, OnFrameUpdate);
 			animator.RegisterToNoLoopAnimationCompletion(OnSanpComplete);

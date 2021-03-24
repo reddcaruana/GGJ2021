@@ -2,12 +2,12 @@
 using UnityEngine;
 using DG.Tweening;
 using Assets.Scripts.Framework;
-using Assets.Scripts.AssetsManagers;
-using Assets.Scripts.Framework.Utils;
-using Assets.Scripts.AquaticCreatures.Fish;
-using Assets.Scripts.Framework.Tools;
-using LoopType = Assets.Scripts.Framework.Tools.LoopType;
 using Assets.Scripts.Controllers;
+using Assets.Scripts.Framework.Utils;
+using Assets.Scripts.Framework.Tools;
+using Assets.Scripts.AquaticCreatures.Fish;
+using Assets.Scripts.Framework.AssetsManagers;
+using LoopType = Assets.Scripts.Framework.Tools.LoopType;
 
 namespace Assets.Scripts.Views.Fish
 {
@@ -36,7 +36,7 @@ namespace Assets.Scripts.Views.Fish
 			if (FishSilhouetteSprites[0] == null)
 			{
 				for (int i = 0; i < FishSilhouetteSprites.Length; i++)
-					FishSilhouetteSprites[i] = AssetLoader.ME.Loader<Sprite>($"Sprites/FishSilhouette/fishSilhouette{i + 1}");
+					FishSilhouetteSprites[i] = AssetLoader.ME.Load<Sprite>($"Sprites/FishSilhouette/fishSilhouette{i + 1}");
 			}
 
 			animator = new RDAnimator(FishSilhouetteSprites.Length, OnFrameUpdate);
@@ -57,7 +57,7 @@ namespace Assets.Scripts.Views.Fish
 
 		public void Set(FishController controller)
 		{
-			name = $"Fish{controller.Data.Type.NiceName}";
+			name = $"Fish{controller.Data.Type.Alias}";
 			// Change Image here
 			spriteRenderer.transform.localScale = Statics.VECTOR3_ONE; // resets Bounds
 			spriteRenderer.transform.localScale = Statics.VECTOR3_ONE * (controller.Size / spriteRenderer.bounds.size.y);
@@ -244,7 +244,7 @@ namespace Assets.Scripts.Views.Fish
 				debugTarget.SetParent(spriteRenderer.transform.parent);
 				debugTarget.ResetTransforms();
 				SpriteRenderer renderer = debugTarget.gameObject.AddComponent<SpriteRenderer>();
-				renderer.sprite = AssetLoader.ME.Loader<Sprite>("Sprites/Circle");
+				renderer.sprite = AssetLoader.ME.Load<Sprite>("Sprites/Circle");
 				renderer.color = Color.red;
 				renderer.sortingOrder = 100;
 			}

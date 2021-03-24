@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using Assets.Scripts.Utils;
+using Assets.Scripts.Player;
 using Assets.Scripts.Constants;
 using System.Collections.Generic;
 using Assets.Scripts.Controllers;
@@ -16,6 +16,7 @@ namespace Assets.Scripts.Seasons
 		private const float MARGIN_NORMALISED = 0.1f;
 
 		public abstract SeasonAreaType Type { get; }
+		public abstract string Alias { get; }
 		public abstract string NiceName { get; }
 		public abstract int NumberOfSegments { get; }
 		public abstract FishData[] SupportedFish { get; }
@@ -45,7 +46,7 @@ namespace Assets.Scripts.Seasons
 				fishControllers[i].RegisterToCoolDownComplete(OnFishCoolDown);
 			}
 
-			PayWall?.Set(NiceName);
+			PayWall?.Set(OnPayWallComplete);
 		}
 
 		public void AssignView(SeasonView view, Vector3 baseWorldPosition)
@@ -76,13 +77,13 @@ namespace Assets.Scripts.Seasons
 		{
 			Vector2 visualSize = GetVisualSize();
 
-			view.Set(visualSize, FishTankArea.Center, NiceName, baseWorldPosition);
+			view.Set(visualSize, FishTankArea.Center, Alias, baseWorldPosition);
 
 			if (PayWall != null)
 			{
 				Vector3 paywallPos = new Vector3();
 				paywallPos.y = (visualSize.y / 2f);
-				PayWall.SetView(paywallPos);
+				PayWall.SetView(paywallPos, Alias, PlayerData.SeasonData.IsOpen(Type));
 			}
 
 			CreateFishViews();
@@ -95,6 +96,9 @@ namespace Assets.Scripts.Seasons
 			view = null;
 			for (int i = 0; i < fishControllers.Length; i++)
 				fishControllers[i].ReleaseView();
+			
+			if (PayWall != null)
+				PayWall.ReleaseView();
 		}
 
 		private void CreateFishViews()
@@ -140,7 +144,7 @@ namespace Assets.Scripts.Seasons
 			{
 				fishControllers[i].SetSpawnPoint(localPosition);
 				
-				if (!fishControllers[i].IsBaotFear())
+				if (!fishControllers[i].IsBoatFear())
 					fishControllers[i].Appear();
 				
 				localPosition.y -= verticalStep;
@@ -167,7 +171,7 @@ namespace Assets.Scripts.Seasons
 
 		public IAquaticCreature OnCast(Vector3 worldPosition)
 		{
-			DebugUtils.Log("Searching for Fish  ~~~~ >sSD");
+			RDebugUtils.Log("Searching for Fish  ~~~~ >sSD");
 
 			Vector3 localPosition;
 			if (HasView)
@@ -220,5 +224,16 @@ namespace Assets.Scripts.Seasons
 				fishControllers[i].FearOfBoats();
 			}
 		}
+
+		private void OnPayWallComplete()
+		{
+			if (PlayerData.SeasonData.IsOpen(Type))
+				return;
+
+			if (Type < SeasonAreaType.MAX)
+				PlayerData.SeasonData.LastSeasonUnlocked.Value = Type;
+		}
+
+		public FishController GetTutorialFish() => fishControllers[fishControllers.Length - 2];
 	}
 }

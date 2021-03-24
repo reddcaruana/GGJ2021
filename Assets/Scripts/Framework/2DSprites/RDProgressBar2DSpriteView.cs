@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.Constants;
+using UnityEngine;
 
 namespace Assets.Scripts.Framework._2DSprites
 {
@@ -14,6 +15,12 @@ namespace Assets.Scripts.Framework._2DSprites
 		protected virtual void Awake()
 		{
 			ProgressSpriteRenderer = transform.Find(GetImagePath()).GetComponent<SpriteRenderer>();
+		}
+
+		public virtual void DisplayInUi()
+		{
+			ProgressSpriteRenderer.sortingLayerID =
+				GetComponent<SpriteRenderer>().sortingLayerID = GameStatics.UI_SORTING_LAYER;
 		}
 
 		public void Set(bool isVertical)

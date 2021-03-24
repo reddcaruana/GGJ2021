@@ -52,5 +52,7 @@ namespace Assets.Scripts.Rods.Tilt
 
 		private bool IsLeft(float eulerAngle) => eulerAngle > 180;
 		private bool IsRight(float eulerAngle) => eulerAngle < 180;
+
+		public override bool InReservedArea(Vector3 worldPosition) => false;
 	}
 }

@@ -21,9 +21,9 @@ namespace Assets.Scripts.Framework.Ui
 		public void InitTransitions(RDUiTransitionAttachment.State state, bool autoGrabMissingPosFromAwake = true) => 
 			uiTransition.Init(rectTransform, state, autoGrabMissingPosFromAwake);
 
-		public virtual void Show(Action onComplete = null) => uiTransition.Show(onComplete);
-		public virtual void ShowInstantly() => uiTransition.ShowInstantly();
-		public virtual void Hide(Action onComplete = null) => uiTransition.Hide(onComplete);
-		public virtual void HideInstantly() => uiTransition.HideInstantly();
+		public virtual bool Show(Action onComplete = null) => uiTransition.Show(onComplete);
+		public virtual bool ShowInstantly() => uiTransition.ShowInstantly();
+		public virtual bool Hide(Action onComplete = null) => uiTransition.Hide(onComplete);
+		public virtual bool HideInstantly() => uiTransition.HideInstantly();
 	}
 }

@@ -1,11 +1,14 @@
-﻿using UnityEngine.UI;
-using Assets.Scripts.Controllers;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
+using Assets.Scripts.Constants;
+using Assets.Scripts.Framework.Ui.Screens;
 
 namespace Assets.Scripts.Ui.Screens
 {
-	public class HUDScreen : ScreenBase
+	public class HUDScreen : RDSimpleScreenBase
 	{
+		public override int Index { get; } = (int)ScreenType.HUD;
+
 		protected override void Awake()
 		{
 			base.Awake();
@@ -17,9 +20,9 @@ namespace Assets.Scripts.Ui.Screens
 
 		}
 
-		private void OnMainMenuButtonMsg() => ViewController.UiController.ShowHideMainMenu(true);
+		private void OnMainMenuButtonMsg() => ScreenManager.ME_.ShowHideScreen(ScreenType.MainMenu, true);
 
-		private void OnLogBookButtonMsg() => ViewController.UiController.ShowHideLogBook(true);
+		private void OnLogBookButtonMsg() => ScreenManager.ME_.ShowHideScreen(ScreenType.LogBook, true);
 
 		protected override void HidePosition()
 		{

@@ -1,9 +1,10 @@
 ﻿using DG.Tweening;
 using UnityEngine;
 using DG.Tweening.Core;
+using Assets.Scripts.Framework;
+using Assets.Scripts.Constants;
 using DG.Tweening.Plugins.Options;
 using Assets.Scripts.Framework._2DSprites;
-using Assets.Scripts.Framework;
 
 namespace Assets.Scripts.Rods
 {
@@ -20,6 +21,12 @@ namespace Assets.Scripts.Rods
 			base.Awake();
 			progressRecoverySpriteRenderer = transform.Find("SpriteProgressRecoveryBar").GetComponent<SpriteRenderer>();
 			originalColor = ProgressSpriteRenderer.color;
+		}
+
+		public override void DisplayInUi()
+		{
+			base.DisplayInUi();
+			progressRecoverySpriteRenderer.sortingLayerID = GameStatics.UI_SORTING_LAYER;
 		}
 
 		protected override void SetInternal()

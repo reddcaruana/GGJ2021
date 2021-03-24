@@ -1,7 +1,7 @@
 ﻿using DG.Tweening;
 using UnityEngine;
-using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Tools;
+using Assets.Scripts.Framework.AssetsManagers;
 
 namespace Assets.Scripts.Views.Fish
 {
@@ -19,7 +19,7 @@ namespace Assets.Scripts.Views.Fish
 			spriteRenderer.color = new Color(1f, 1f, 1f, 0f);
 
 			for (int i = 0; i < sprites.Length; i++)
-				sprites[i] = AssetLoader.ME.Loader<Sprite>("Sprites/VTrail/VTrail" + i);
+				sprites[i] = AssetLoader.ME.Load<Sprite>("Sprites/VTrail/VTrail" + i);
 
 			animator = new RDAnimator(sprites.Length, OnFrameUpdate);
 			animator.Loop = Framework.Tools.LoopType.Normal;

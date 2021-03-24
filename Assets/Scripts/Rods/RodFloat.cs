@@ -2,10 +2,10 @@
 using UnityEngine;
 using System.Collections;
 using Assets.Scripts.Views.Rods;
+using Assets.Scripts.Controllers;
 using Random = UnityEngine.Random;
-using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Utils;
-using Assets.Scripts.Utils;
+using Assets.Scripts.Framework.AssetsManagers;
 
 namespace Assets.Scripts.Rods
 {
@@ -23,7 +23,7 @@ namespace Assets.Scripts.Rods
 
 		public void CreateView(Transform parent)
 		{
-			view = MonoBehaviour.Instantiate(AssetLoader.ME.Loader<RodFloatView>("Prefabs/Rods/RodFloatBaseView"), parent);
+			view = MonoBehaviour.Instantiate(AssetLoader.ME.Load<RodFloatView>("Prefabs/Rods/RodFloatBaseView"), parent);
 			startWorldPos = view.transform.position;
 		}
 
@@ -89,8 +89,8 @@ namespace Assets.Scripts.Rods
 
 			IEnumerator NibbleWait(float waiTime, Action onWaitComplete)
 			{
-				float startTime = Time.time;
-				while (IsNibbling && Time.time - startTime <= waiTime)
+				float startTime = GamePausableTime.time;
+				while (IsNibbling && GamePausableTime.time - startTime <= waiTime)
 					yield return null;
 				onWaitComplete();
 			}
@@ -117,8 +117,8 @@ namespace Assets.Scripts.Rods
 
 		private IEnumerator CatchWindowCoroutine(float duration, Action onEscape)
 		{
-			float startTime = Time.time;
-			while (Time.time - startTime < duration)
+			float startTime = GamePausableTime.time;
+			while (GamePausableTime.time - startTime < duration)
 			{
 				// OnHooked CanCatch will be false
 				if (!CanCatch)
@@ -138,7 +138,7 @@ namespace Assets.Scripts.Rods
 			if (IsReseting)
 				return;
 
-			DebugUtils.Log("Reeled In - Reset ........./!");
+			RDebugUtils.Log("Reeled In - Reset ........./!");
 
 			IsReseting = true;
 

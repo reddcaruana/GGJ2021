@@ -4,13 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using Assets.Scripts.Framework;
-using Assets.Scripts.Controllers;
+using Assets.Scripts.Constants;
 using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.Framework.Utils.Data;
+using Assets.Scripts.Framework.Ui.Screens;
 
 namespace Assets.Scripts.Ui.Screens
 {
-	public class MainMenuScreen : ScreenBase
+	public class MainMenuScreen : RDSimpleScreenBase
 	{
 		private static readonly Quaternion HookHiddenRotation = Quaternion.Euler(new Vector3(0, 0, -114));
 		private static readonly Quaternion k1HiddenRotation = Quaternion.Euler(new Vector3(0, 0, 121));
@@ -21,11 +22,11 @@ namespace Assets.Scripts.Ui.Screens
 		private static readonly Quaternion k6HiddenRotation = Quaternion.Euler(new Vector3(0, 0, -86));
 		private static readonly Quaternion k7HiddenRotation = Quaternion.Euler(new Vector3(0, 0, 60));
 
+		public override int Index { get; } = (int)ScreenType.MainMenu;
+
 		private Image bgBlackImage;
 		private Image bgWaterImage;
 		private AnimationHelper helperButtonPlay;
-		private AnimationHelper helperButtonSound;
-		private AnimationHelper helperButtonLogBook;
 
 		private AnimationHelper helperHook;
 		private AnimationHelper helperK1;
@@ -42,8 +43,6 @@ namespace Assets.Scripts.Ui.Screens
 			base.Awake();
 
 			helperButtonPlay = FindButton("ButtonPlay", delay: 0, durationShow: 1, durationHide: 1, callback: OnPlayButtonMsg);
-			helperButtonSound = FindButton("ButtonSound", delay: 0, durationShow: 1, durationHide: 1, callback: OnSoundButtonMsg);
-			helperButtonLogBook = FindButton("ButtonLogBook", delay: 0, durationShow: 1, durationHide: 1, callback: OnLogBookButtonMsg);
 
 			AnimationHelper FindButton(string name, float delay, float durationShow, float durationHide, UnityAction callback)
 			{
@@ -66,31 +65,18 @@ namespace Assets.Scripts.Ui.Screens
 			helperTitle = new AnimationHelper((RectTransform)transform.Find("ImageTitle").transform, 0, 1, 0.4f);
 		}
 
-		private void OnPlayButtonMsg()
-		{
-			ViewController.UiController.ShowHideMainMenu(false);
-		}
+		private void OnPlayButtonMsg() => ScreenManager.ME.ShowHideScreen(this, false);
 
-		private void OnSoundButtonMsg()
-		{
-
-		}
-
-		private void OnLogBookButtonMsg()
-		{
-
-		}
-
-		public override void Show(Action onComplete = null)
+		public override bool Show(Action onComplete = null)
 		{
 			HidePropsInstantly();
-			ShowInstantly();
+			if (!ShowInstantly())
+				return false;
+
 			bgBlackImage.DOFade(0, 1f).SetEase(Ease.InOutSine);
 			bgWaterImage.DOFade(0.4f, 1f).SetEase(Ease.InOutSine).onComplete = OnComplete;
 
 			helperButtonPlay.RectTransform.DOScale(helperButtonPlay.ShowData.Scale, helperButtonPlay.DurationShow).SetEase(Ease.InOutSine);
-			helperButtonSound.RectTransform.DOScale(helperButtonSound.ShowData.Scale, helperButtonSound.DurationShow).SetEase(Ease.InOutSine);
-			helperButtonLogBook.RectTransform.DOScale(helperButtonLogBook.ShowData.Scale, helperButtonLogBook.DurationShow).SetEase(Ease.InOutSine);
 
 			helperHook.RectTransform.DOLocalRotateQuaternion(helperHook.ShowData.LocalRotation, helperHook.DurationShow).SetEase(Ease.InOutSine);
 			helperK1.RectTransform.DOLocalRotateQuaternion(helperK1.ShowData.LocalRotation, helperK1.DurationShow).SetEase(Ease.InOutSine);
@@ -108,14 +94,18 @@ namespace Assets.Scripts.Ui.Screens
 				StartIdle();
 				onComplete?.Invoke();
 			}
+
+			return true;
 		}
 
-		public override void Hide(Action onComplete = null)
+		public override bool Hide(Action onComplete = null)
 		{
 			StopIdle();
-			base.Hide(onComplete);
 
-			//bgWaterImage.DOFade(0, 1f).SetEase(Ease.InOutSine).onComplete = () => onComplete?.Invoke();
+			if (!base.Hide(onComplete))
+				return false;
+
+			bgWaterImage.DOFade(0, 0.5f).SetEase(Ease.InOutSine);
 
 			//helperButtonPlay.RectTransform.DOScale(0, helperButtonPlay.DurationHide).SetEase(Ease.InOutSine);
 			//helperButtonSound.RectTransform.DOScale(0, helperButtonSound.DurationHide).SetEase(Ease.InOutSine);
@@ -131,6 +121,8 @@ namespace Assets.Scripts.Ui.Screens
 			//helperK7.RectTransform.DOLocalRotateQuaternion(HookHiddenRotation, helperK7.DurationHide).SetEase(Ease.InOutSine);
 
 			//helperTitle.RectTransform.DOScale(0, helperTitle.DurationHide);
+
+			return true;
 		}
 
 		private void HidePropsInstantly()
@@ -138,8 +130,6 @@ namespace Assets.Scripts.Ui.Screens
 			bgWaterImage.DOFade(0, 0);
 
 			helperButtonPlay.RectTransform.localScale = Statics.VECTOR3_ZERO;
-			helperButtonSound.RectTransform.localScale = Statics.VECTOR3_ZERO;
-			helperButtonLogBook.RectTransform.localScale = Statics.VECTOR3_ZERO;
 
 			helperHook.RectTransform.localRotation = HookHiddenRotation;
 			helperK1.RectTransform.localRotation = k1HiddenRotation;

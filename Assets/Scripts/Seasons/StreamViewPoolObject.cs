@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Assets.Scripts.Controllers;
 using Assets.Scripts.Views.Seasons;
-using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.AssetsManagers;
 
 namespace Assets.Scripts.Seasons
@@ -11,24 +10,28 @@ namespace Assets.Scripts.Seasons
 		private const float SPEED_MIN = 1;
 		private const float SPEED_MAX = 5;
 
+		private static float SpawnTopY = -1f;
+		private static float SpawnBottomY;
+		private static float DespawnTop;
+		private static float DespawnBottom;
+
 		private static StreamView prefab;
 		public static StreamView Prefab
 		{
 			get
 			{
 				if (prefab == null)
-					prefab = AssetLoader.ME.Loader<StreamView>("Prefabs/Stream/StreamView");
+
+					prefab = AssetLoader.ME.Load<StreamView>("Prefabs/Stream/StreamView");
 				return prefab;
 			}
 		}
 
-		private readonly float BoundY;
 		private float speed;
 		Vector3 targetPos;
 
 		public StreamViewPoolObject() : base(MonoBehaviour.Instantiate(Prefab, null))
 		{
-			BoundY = View.Bounds().y;
 		}
 
 		public static void UnloadPrefab() => prefab = null;
@@ -37,9 +40,22 @@ namespace Assets.Scripts.Seasons
 		{
 			base.Spawn(parent);
 
-			Start();
+			TryPrepare();
+
+			StartFromTop();
 			View.PlayAnimation();
 			GameController.ME.RegisterToUpdate(OnUpdate);
+		}
+
+		private void TryPrepare() 
+		{
+			if (SpawnTopY != -1)
+				return;
+
+			SpawnTopY = ViewController.ScreenTop.y + View.Bounds().y;
+			SpawnBottomY = ViewController.ScreenBottom.y;
+			DespawnTop = SpawnTopY + View.Bounds().y;
+			DespawnBottom = ViewController.ScreenBottom.y - (View.Bounds().y / 2f);
 		}
 
 		public override void Despawn()
@@ -51,24 +67,32 @@ namespace Assets.Scripts.Seasons
 
 		private void OnUpdate()
 		{
-			if (View.transform.position.y < ViewController.ScreenBottom.y)
-				Start();
+			if (View.transform.position.y < DespawnBottom)
+				StartFromTop();
+			else if (View.transform.position.y > DespawnTop)
+				StartFromBottom();
 
 			View.transform.position = Vector3.MoveTowards(View.transform.position, targetPos, speed * Time.deltaTime);
 		}
 
-		private void Start()
+		private void StartFromTop() => StartAt(SpawnTopY);
+
+		private void StartFromBottom() => StartAt(SpawnBottomY);
+
+		private void StartAt(float yPosition)
 		{
 			ViewController.CurrentSeason.ParentToView(View.transform);
 
 			speed = Random.Range(SPEED_MIN, SPEED_MAX);
-			Vector3 initPos = ViewController.ScreenTop;
-			initPos.y += BoundY;
-			initPos.x = Random.Range(0, ViewController.CurrentSeason.GetVisualSize().x) - (ViewController.CurrentSeason.GetVisualSize().x / 2f);
+			Vector3 initPos = new Vector2()
+			{
+				x = Random.Range(0, ViewController.CurrentSeason.GetVisualSize().x) - (ViewController.CurrentSeason.GetVisualSize().x / 2f),
+				y = yPosition
+			};
+
 			View.transform.position = initPos;
 			targetPos = initPos;
 			targetPos.y = -9999999;
-
 		}
 	}
 }

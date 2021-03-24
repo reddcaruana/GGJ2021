@@ -55,6 +55,8 @@ namespace Assets.Scripts.Framework.Tools
 
 		private IEnumerator PlaybackCoroutine()
 		{
+			onFrameUpdate(CurrentFrame);
+
 			int tempFrame;
 			float startTime;
 			while(State == AnimationState.Play)

@@ -2,21 +2,30 @@
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
+using Assets.Scripts.Player;
 using Assets.Scripts.Constants;
 using Assets.Scripts.Framework;
 using Assets.Scripts.Framework.Ui;
-using Assets.Scripts.Framework.Utils;
+using Assets.Scripts.Framework.Ui.Screens;
+using Assets.Scripts.Framework.Utils.Data;
 using Assets.Scripts.AquaticCreatures.Fish;
+using Assets.Scripts.Framework.Utils.Animations;
 
 namespace Assets.Scripts.Ui.Screens
 {
-	public class CaughtFishScreen : ScreenBase
+	public class CaughtFishScreen : RDSimpleScreenBase
 	{
+		public override int Index { get; } = (int)ScreenType.CaughtFish;
+
 		private RDUiTransitionElement bucketTransitionElement;
 		private Image fishImage;
+		private Image glowImage;
 
-		private Vector3 fishOriginalScale;
-		private Vector3 fishOriginalPos;
+		private PositioningData fishPositioningData;
+		private PositioningData glowPositioningData;
+
+		private bool isNew;
+		private bool isShiny;
 
 		protected override void Awake()
 		{
@@ -34,17 +43,31 @@ namespace Assets.Scripts.Ui.Screens
 			bucketTransitionElement.DisableOnHide = true;
 
 			fishImage = transform.Find("ImageFish").GetComponent<Image>();
-			fishOriginalScale = fishImage.rectTransform.localScale;
+			fishPositioningData = new PositioningData(fishImage.rectTransform);
 			fishImage.rectTransform.localScale = Statics.VECTOR3_ZERO;
-			fishOriginalPos = fishImage.rectTransform.anchoredPosition;
 
+			glowImage = transform.Find("ImageGlow").GetComponent<Image>();
+			glowPositioningData = new PositioningData(glowImage.rectTransform);
+			glowImage.rectTransform.localScale = Statics.VECTOR3_ZERO;
 		}
 
-		public void Show(FishTypeData data, Action onComplete = null)
+		public void Set(FishLogData data)
 		{
-			ShowInstantly();
-			fishImage.sprite = FishWiki.GetSprite(data);
-			fishImage.rectTransform.DOScale(fishOriginalScale, 0.5f).SetEase(Ease.OutElastic).onComplete = () => 
+			isNew = PlayerData.LogBook.TryGetData(data.Type, out FishLogData result) && result.Total == 1;
+			isShiny = data.Shiny != 0;
+			fishImage.material = isShiny ? MaterialStatics.SHINY : null;
+			fishImage.sprite = FishWiki.GetSprite(data.Type);
+		}
+
+		public override bool Show(Action onComplete = null)
+		{
+			if (!ShowInstantly())
+				return false;
+
+			if (isNew || isShiny)
+				GlowAnimation();
+
+			fishImage.rectTransform.DOScale(fishPositioningData.Scale, 1f).SetEase(Ease.OutElastic).onComplete = () => 
 			{
 				bucketTransitionElement.Show(() => 
 				{
@@ -52,21 +75,9 @@ namespace Assets.Scripts.Ui.Screens
 					{
 						const float startScale = 1f;
 						const float targetScale = 0.8f;
+						bucketTransitionElement.rectTransform.RDBounceAnimation(0.3f, startScale, targetScale, onComplete: HideBucket);
 
-						float i = 0;
-						float f;
-						Vector3 currentScale = bucketTransitionElement.rectTransform.localScale;
-						DOTween.To(() => i, (x) =>
-						{
-							i = x;
-							f = i < 0.5f ? i / 0.5f: 1 - ((i - 0.5f) / 0.5f);
-							currentScale.y = Mathf.Lerp(startScale, targetScale, f);
-							currentScale.x = currentScale.z = MathUtils.VolumePreservation(currentScale.y, startScale);
-							bucketTransitionElement.rectTransform.localScale = currentScale;
-						}, 1f, 0.3f).onComplete = () =>
-						{
-							bucketTransitionElement.Hide(OnComplete);
-						};
+						void HideBucket() => bucketTransitionElement.Hide(OnComplete);
 					};
 				});
 			};
@@ -74,11 +85,27 @@ namespace Assets.Scripts.Ui.Screens
 			void OnComplete()
 			{
 				fishImage.rectTransform.localScale = Statics.VECTOR3_ZERO;
-				fishImage.rectTransform.anchoredPosition = fishOriginalPos;
+				fishImage.rectTransform.anchoredPosition3D = fishPositioningData.AnchoredPos3D;
+
+				if (isNew || isShiny)
+				{
+					glowImage.rectTransform.localScale = Statics.VECTOR3_ZERO;
+					glowImage.rectTransform.anchoredPosition3D = glowPositioningData.AnchoredPos3D;
+					glowImage.color = Statics.COLOR_WHITE;
+				}
+
 				onComplete?.Invoke();
 			}
+
+			return true;
 		}
 
+		private void GlowAnimation()
+		{
+			glowImage.rectTransform.DOScale(glowPositioningData.Scale, 0.8f).SetEase(Ease.OutBack).onComplete = OnComplete;
+
+			void OnComplete() => glowImage.DOFade(0, 0.3f);
+		}
 
 
 

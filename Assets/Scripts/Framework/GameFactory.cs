@@ -1,4 +1,4 @@
-﻿using Assets.Scripts.AssetsManagers;
+﻿using Assets.Scripts.Framework.AssetsManagers;
 
 namespace Assets.Scripts.Framework
 {

@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using Assets.Scripts.Views.Fish;
-using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.AssetsManagers;
 
 namespace Assets.Scripts.AquaticCreatures.Fish
@@ -13,7 +12,7 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			get
 			{
 				if (prefab == null)
-					prefab = AssetLoader.ME.Loader<FishView>("Prefabs/Fish/FishBase");
+					prefab = AssetLoader.ME.Load<FishView>("Prefabs/Fish/FishBase");
 				return prefab;
 			}
 		}

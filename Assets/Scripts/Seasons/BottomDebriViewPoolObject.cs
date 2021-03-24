@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using Assets.Scripts.Views.Seasons;
-using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.AssetsManagers;
 
 namespace Assets.Scripts.Seasons
@@ -13,7 +12,7 @@ namespace Assets.Scripts.Seasons
 			get
 			{
 				if (prefab == null)
-					prefab = AssetLoader.ME.Loader<BottomDebriView>("Prefabs/BottomDebri/BottomDebriView");
+					prefab = AssetLoader.ME.Load<BottomDebriView>("Prefabs/BottomDebri/BottomDebriView");
 				return prefab;
 			}
 		}

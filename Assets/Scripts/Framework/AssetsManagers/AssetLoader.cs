@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
+using UnityEngine.U2D;
 
-namespace Assets.Scripts.AssetsManagers
+namespace Assets.Scripts.Framework.AssetsManagers
 {
 	public abstract class AssetLoader
 	{
@@ -11,6 +12,7 @@ namespace Assets.Scripts.AssetsManagers
 			ME = this;
 		}
 
-		public abstract T Loader<T>(string path) where T : Object;
+		public abstract T Load<T>(string path) where T : Object;
+		public Sprite LoadSprite(string name, SpriteAtlas atlas) => atlas.GetSprite(name);
 	}
 }

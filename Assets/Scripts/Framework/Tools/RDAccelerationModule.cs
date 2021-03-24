@@ -27,8 +27,6 @@ namespace Assets.Scripts.Framework.Tools
 				{
 					CoroutineRunner.HaltCoroutine(coroutine);
 					coroutine = null;
-					speed = 0;
-					speedVector = Statics.VECTOR2_ZERO;
 				}
 			} 
 		}
@@ -37,14 +35,12 @@ namespace Assets.Scripts.Framework.Tools
 		private Func<Vector3> getWorldPosition;
 		private Func<Vector3, Vector3> checkPosition;
 		
-		private float speed;
+		public float Speed { get; private set; }
 		private float drag = 0.99f;
 		private Vector2 speedVector = new Vector2();
 		private float speedVectorTrashHold = 0.0001f;
 
 		private Coroutine coroutine;
-
-
 
 		public RDAccelerationModule(Action<Vector3> moveUpdate, Func<Vector3> getWorldPosition)
 		{
@@ -65,7 +61,7 @@ namespace Assets.Scripts.Framework.Tools
 		
 		public void SetSpeedVectorTrashHold(float trashHold) => speedVectorTrashHold = trashHold;
 
-		public void SetSpeed(float speed) => this.speed = speed;
+		public void SetSpeed(float speed) => this.Speed = speed;
 
 		public void SetDrag(float normalized) => drag = normalized;
 
@@ -73,7 +69,7 @@ namespace Assets.Scripts.Framework.Tools
 		{
 			while (IsActive)
 			{
-				speedVector += DirectionVector * speed;
+				speedVector += DirectionVector * Speed;
 				speedVector *= drag;
 
 				TrashHold();
@@ -102,7 +98,7 @@ namespace Assets.Scripts.Framework.Tools
 
 				moveUpdate(pos);
 
-				speed = 0;
+				Speed = 0;
 				yield return null;
 			}
 		}
@@ -114,6 +110,13 @@ namespace Assets.Scripts.Framework.Tools
 
 			bool Check(float value) => 
 				MathUtils.InRangeFloat(value, -speedVectorTrashHold, speedVectorTrashHold);
+		}
+
+		public void ResetSpeed()
+		{
+			speedVector.x = 0;
+			speedVector.y = 0;
+			Speed = 0;
 		}
 	}
 }

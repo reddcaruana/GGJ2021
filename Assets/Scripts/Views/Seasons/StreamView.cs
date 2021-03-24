@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
-using Assets.Scripts.AssetsManagers;
 using Assets.Scripts.Framework.Tools;
+using Assets.Scripts.Framework.AssetsManagers;
 
 namespace Assets.Scripts.Views.Seasons
 {
@@ -17,7 +17,7 @@ namespace Assets.Scripts.Views.Seasons
 			if (StreamSprites[0] == null)
 			{
 				for (int i = 0; i < StreamSprites.Length; i++)
-					StreamSprites[i] = AssetLoader.ME.Loader<Sprite>("Sprites/Stream/stream" + (i + 1));
+					StreamSprites[i] = AssetLoader.ME.Load<Sprite>("Sprites/Stream/stream" + (i + 1));
 			}
 
 			spriteRenderer = transform.Find("SpriteStream").GetComponent<SpriteRenderer>();

@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Assets.Scripts.Rods;
-using Assets.Scripts.Utils;
 using Assets.Scripts.Constants;
 using Assets.Scripts.Views.Fish;
 using Assets.Scripts.Controllers;
@@ -12,9 +11,12 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 {
 	public class FightingModule
 	{
+		private const float SPEED_VS_WEIGHT = 0.2f;
 		private const float LIMIT_PADDING = 0.8f;
 		private const float MAX_REST_TIME = 3;
 		private const float WARNING_REST_TIME = MAX_REST_TIME * 0.33f;
+
+		public static PullState FishPullState { get; private set; }
 
 		private static VTrail vTrail;
 		private readonly Vector3[] directionVectors = new Vector3[]
@@ -28,11 +30,14 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		private readonly RodBase rod;
 		private readonly Vector2 realInTarget;
 		private readonly Area2D area;
+		private readonly float fishInitMaxEnergy;
 		private int directionIndex;
 
 		public FightingModule(FishController fishController, RodBase rod)
 		{
 			this.fishController = fishController;
+			fishInitMaxEnergy = fishController.Energy.Max;
+
 			this.rod = rod;
 
 			realInTarget = new Vector2(0f, ViewController.Area.BottomRightCorner.y);
@@ -50,40 +55,52 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			accelerationModule = new RDAccelerationModule(OnMove, fishController.GetViewWorldPosition);
 			accelerationModule.IsActive = true;
 
-			ShowDebug();
 			CoroutineRunner.RunCoroutine(FightCoroutine());
 		}
 
 		private IEnumerator FightCoroutine()
 		{
+			Debug.Log("<color=yellow> *-* FIGHT!!!</color>");
 			float redirectStartTime = 0f;
 			float redirectTime = 0;
-			PullState fishPullState = PullState.None;
+			FishPullState = PullState.None;
 
 			float startRestingTime = 0;
+			bool fishStartedResting = false;
 
 			vTrail.Size(fishController.Size);
 			vTrail.Show();
 
 			while (true)
 			{
-				DebugViewUpdate();
-				DebugInfo(fishPullState);
+				if (GameController.ME.IsPaused)
+					yield return OnPause();
 
 				ShowHideVTrailOnRest();
 
 				if (!fishController.Energy.IsResting)
 				{
+					if (fishStartedResting)
+						fishStartedResting = false;
 
-					if (Time.time - redirectStartTime >= redirectTime)
+					if (GamePausableTime.time - redirectStartTime >= redirectTime)
 					{
 						redirectTime = Random.Range(4, 6);
-						redirectStartTime = Time.time;
+						redirectStartTime = GamePausableTime.time;
 						directionIndex = RedirectFish();
-						fishPullState = FishPullState(directionIndex);
+						FishPullState = GetFishPullState(directionIndex);
 					}
 
-					accelerationModule.SetSpeed(0.1f * Time.deltaTime);
+					accelerationModule.SetSpeed(SPEED_VS_WEIGHT * (fishController.Energy.Max / fishInitMaxEnergy) * Time.deltaTime);
+				}
+				else
+				{
+					if (!fishStartedResting)
+					{
+						fishStartedResting = true;
+						fishController.Energy.ResetProperties(fishController.Energy.Max * 0.8f);
+						rod.Energy.Reset();
+					}
 				}
 
 				if (rod.Net.IsIn(fishController.GetViewWorldPosition()))
@@ -94,11 +111,11 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 
 				if (!fishController.Energy.IsResting && rod.Energy.IsResting)
 				{
-					float restingTime = Time.time - startRestingTime;
+					float restingTime = GamePausableTime.time - startRestingTime;
 
 					if (restingTime >= MAX_REST_TIME)
 					{
-						DebugUtils.Log("Escaped due to much resting.");
+						RDebugUtils.Log("Escaped due to much resting.");
 						rod.FishEscaped();
 						break;
 					}
@@ -108,30 +125,29 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 
 				if (rod.Energy.Value == 0)
 				{
-					DebugUtils.Log("Escaped due to line snap.");
+					RDebugUtils.Log("Escaped due to line snap.");
 					rod.LineSnap();
 					break;
 				}
 
-				if (rod.PullState == fishPullState && !rod.Energy.IsResting)
+				if (!fishController.Energy.IsResting && rod.PullState == FishPullState && !rod.Energy.IsResting)
 				{
 					rod.Energy.Rest();
-					startRestingTime = Time.time;
-					DebugUtils.Log("Rod Start Resting");
+					startRestingTime = GamePausableTime.time;
+					RDebugUtils.Log("Rod Start Resting");
 				}
-				else if (rod.PullState != fishPullState)
+				else if (rod.PullState != FishPullState)
 				{
 					rod.Energy.StopResting();
 					if (rod.IsLineSlack)
 						rod.LineSlack(false);
 
-					if ((rod.PullState == PullState.Left && fishPullState == PullState.Right) || 
-						(rod.PullState == PullState.Right && fishPullState == PullState.Left))
+					if (RodIsCountering(rod, FishPullState))
 					{
 						ConsumeFishEnergy();
-						ConsumeRodEnergy();
 					}
-					else
+
+					if (!fishController.Energy.IsResting)
 						ConsumeRodEnergy();
 				}
 
@@ -140,7 +156,15 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 
 			vTrail.Hide();
 			accelerationModule.IsActive = false;
-			HideDebug();
+		}
+
+		private IEnumerator OnPause()
+		{
+			rod.Energy.IsPaused = true;
+			fishController.Energy.IsPaused = true;
+			yield return new WaitUntil(() => !GameController.ME.IsPaused);
+			rod.Energy.IsPaused = false;
+			fishController.Energy.IsPaused = false;
 		}
 
 		// Bounds are check after acceleration so the e can keep the fish facing the correct direction
@@ -148,7 +172,8 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 		private void OnMove(Vector3 newPos)
 		{
 			Vector3 lookAhead = (directionVectors[directionIndex] * FishView.AHEAD) + newPos;
-			fishController.ManualSwim(CheckPosition(newPos), lookAhead, isFaceAhead: false);
+			newPos = CheckPosition(newPos);
+			fishController.ManualSwim(newPos, lookAhead, isFaceAhead: false);
 			vTrail.Update(newPos, lookAhead);
 		}
 
@@ -166,6 +191,9 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 
 		public void ReelIn(float speed)
 		{
+			if (fishController.Energy.IsResting && accelerationModule.DirectionVector.y > 0)
+				accelerationModule.ResetSpeed();
+
 			accelerationModule.SetDirection(MathUtils.AimAtTarget2D(realInTarget, fishController.GetViewWorldPosition()));
 			accelerationModule.SetSpeed(speed);
 		}
@@ -178,20 +206,31 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			return directionIndex;
 		}
 
-		private PullState FishPullState(int directionIndex)
+		private static PullState GetFishPullState(int directionIndex)
 		{
 			switch (directionIndex)
 			{
 				case 0: return PullState.Left;
 				case 1: return PullState.Right;
-				default: DebugUtils.LogError("[FightModule] Unable to Handle directiuonIndex: " + directionIndex);
+				default: RDebugUtils.LogError("[FightModule] Unable to Handle directiuonIndex: " + directionIndex);
 					return PullState.None;
 			}
 		}
 
+		public static bool RodIsCountering(RodBase rod, PullState fishPullState)
+		{
+			return (rod.PullState == PullState.Left && fishPullState == PullState.Right) ||
+						(rod.PullState == PullState.Right && fishPullState == PullState.Left);
+		}
+
+		public static bool RodIsRestoring(RodBase rod, PullState fishPullState)
+		{
+			return (rod.PullState == PullState.Left && fishPullState == PullState.Left) ||
+						(rod.PullState == PullState.Right && fishPullState == PullState.Right);
+		}
+
 		private void ConsumeFishEnergy() => fishController.Energy.Consume(rod.Energy.BlowBack * Time.deltaTime);
 		private void ConsumeRodEnergy() => rod.Energy.Consume(fishController.Energy.BlowBack * Time.deltaTime, autoRest: false);
-
 
 		private void ShowHideVTrailOnRest()
 		{
@@ -201,16 +240,5 @@ namespace Assets.Scripts.AquaticCreatures.Fish
 			else if (fishController.Energy.IsResting && vTrail.IsActive)
 				vTrail.Hide();
 		}
-
-		[System.Diagnostics.Conditional("RDEBUG")]
-		private void ShowDebug() => ViewController.UiController.DebugShow(rod.Energy.Max, fishController.Energy.Max);
-		[System.Diagnostics.Conditional("RDEBUG")]
-		private void HideDebug() => ViewController.UiController.DebugHide();
-		[System.Diagnostics.Conditional("RDEBUG")]
-		private void DebugViewUpdate() => ViewController.UiController.UpdateFightValues(rod.Energy.Value, fishController.Energy.Value);
-		[System.Diagnostics.Conditional("RDEBUG")]
-		private void DebugInfo(PullState fishPullState) => 
-			ViewController.UiController.UpdateInfo(
-				$"Rod: {rod.PullState}, Fish: {fishPullState}\nDV: {VectorUtils.Print(accelerationModule.DirectionVector)}");
 	}
 }

@@ -1,33 +1,40 @@
 ﻿using System;
 using UnityEngine;
-using Assets.Scripts.Utils;
 using Assets.Scripts.Player;
 using Assets.Scripts.Generic;
 using Assets.Scripts.Constants;
 using Assets.Scripts.Rods.Tilt;
 using Assets.Scripts.Views.Rods;
+using Assets.Scripts.Ui.Screens;
 using Assets.Scripts.Controllers;
-using Assets.Scripts.AssetsManagers;
+using Assets.Scripts.Framework.Utils;
 using Assets.Scripts.AquaticCreatures;
 using Assets.Scripts.AquaticCreatures.Fish;
-using UnityEngine.InputSystem;
+using Assets.Scripts.Framework.AssetsManagers;
 
 namespace Assets.Scripts.Rods
 {
 	public abstract class RodBase
 	{
+		public const float NIBBLE_TIME = 1f;
 		public abstract Vector3 LineStartLocalPos { get; }
 		public abstract string NiceName { get; }
+
 
 		private readonly RodTiltHandler RodTiltHandler = RodTiltFactory.Create();
 		private readonly RodLine RodLine = new RodLine();
 		private readonly RodFloat RodFloat = new RodFloat();
 		public readonly RodNet Net;
 		public readonly Energy Energy;
+
 		public PullState PullState = PullState.None;
+		public IAquaticCreature PotentialCatch { get; private set; }
 		public bool IsCasted => RodFloat.IsCasted;
-		public bool IsBusy => IsCasted && (RodFloat.IsNibbling || RodFloat.CanCatch || potentialCatch != null);
+		public bool FishCanBeCaught => RodFloat.CanCatch;
+		public bool FishHooked => PotentialCatch != null;
+		public bool IsBusy => IsCasted && (RodFloat.IsNibbling || RodFloat.CanCatch || FishHooked);
 		public bool IsLineSlack { get; private set; }
+		public float NibbleTime { get; set; } = NIBBLE_TIME;
 
 		protected readonly float ReelInCoolDownTime = 0.4f;
 		private float startedReelInCoolDownTime = 1f;
@@ -38,7 +45,6 @@ namespace Assets.Scripts.Rods
 		public bool HasVeiw => view != null;
 		private RodBaseView view;
 
-		private IAquaticCreature potentialCatch;
 
 		public RodBase()
 		{
@@ -50,7 +56,7 @@ namespace Assets.Scripts.Rods
 
 		public void CreateView(Transform parent)
 		{
-			view = MonoBehaviour.Instantiate(AssetLoader.ME.Loader<RodBaseView>("Prefabs/Rods/RodBaseView"), parent);
+			view = MonoBehaviour.Instantiate(AssetLoader.ME.Load<RodBaseView>("Prefabs/Rods/RodBaseView"), parent);
 			view.Set(NiceName, LineStartLocalPos);
 			view.SetPosition(Net.CenterWorldPos);
 			RodLine.CreateView(view.transform);
@@ -61,7 +67,7 @@ namespace Assets.Scripts.Rods
 
 			GameController.ME.RegisterToUpdate(OnGameControllerUpdate);
 
-			DebugUtils.CreateDebugAreaView(Net.Radius, Color.red, "Net", -5, view.transform);
+			RDebugUtils.CreateCircularDebugAreaView(Net.Radius, Color.red, "Net", -5, view.transform);
 		}
 
 		private void OnPause(bool pause)
@@ -78,9 +84,11 @@ namespace Assets.Scripts.Rods
 		public void UnregisterFromOnCastComnplete(Func<Vector3, IAquaticCreature> callback) =>
 			onCastComplete -= callback;
 
+		public bool InReserverdArea(Vector3 worldPosition) => RodTiltHandler.InReservedArea(worldPosition);
+
 		public bool TryCast(Vector3 worldPosition)
 		{
-			if (RodFloat.IsCasted || !ViewController.CanCast(worldPosition))
+			if (RodFloat.IsCasted || !ViewController.CanCast(worldPosition) || RodTiltHandler.InReservedArea(worldPosition))
 				return false;
 
 			Cast(worldPosition);
@@ -89,7 +97,7 @@ namespace Assets.Scripts.Rods
 
 		private void Cast(Vector3 worldPosition)
 		{
-			DebugUtils.Log("Casting ........./Z");
+			RDebugUtils.Log("Casting ........./Z");
 			RodFloat.Cast(worldPosition, 0.5f, OnCastCompolete);
 			
 			void OnCastCompolete()
@@ -104,12 +112,12 @@ namespace Assets.Scripts.Rods
 			if (creature == null)
 				return;
 
-			DebugUtils.Log($"Found Fish: {creature.Data.Type.NiceName}  ~~~~ >sSD");
+			RDebugUtils.Log($"Found Fish: {creature.Data.Type.Alias}  ~~~~ >sSD");
 
-			potentialCatch = creature;
+			PotentialCatch = creature;
 			RodFloat.Nibble(CatchWindow);
 			
-			void CatchWindow() => RodFloat.CatchWindow(2f, FishEscaped);
+			void CatchWindow() => RodFloat.CatchWindow(NibbleTime, FishEscaped);
 		}
 
 
@@ -121,26 +129,26 @@ namespace Assets.Scripts.Rods
 			// Fish Escapes if you reel in while Nibbling
 			if (RodFloat.IsNibbling)
 			{
-				DebugUtils.Log("Reeled in while Nibbling ........./!");
+				RDebugUtils.Log("Reeled in while Nibbling ........./!");
 				FishEscaped();
 			}
 			// Fish is Caught
 			else if (RodFloat.CanCatch)
 			{
-				DebugUtils.Log("Hooked Fish ........./Z >sSD");
+				RDebugUtils.Log("Hooked Fish ........./Z >sSD");
 
 				RodFloat.Hooked();
-				potentialCatch.Fight();
+				PotentialCatch.Fight();
 			}
 			// Pull Catch
-			else if (potentialCatch != null)
+			else if (FishHooked)
 			{
 				if (isCoolDown)
 					return;
 
-				DebugUtils.Log("Pull Fish ........./! >sSD");
+				RDebugUtils.Log("Pull Fish ........./! >sSD");
 				startedReelInCoolDownTime = Time.time;
-				potentialCatch.ReelIn(-0.06f);
+				PotentialCatch.ReelIn(-0.06f);
 			}
 			//Reel in float
 			else
@@ -171,22 +179,23 @@ namespace Assets.Scripts.Rods
 
 		public void FishEscaped(bool isInstant)
 		{
-			potentialCatch.Escape();
+			PotentialCatch.Escape();
 			Reset(isInstant);
 		}
 
 		public void CaughtFish(FishLogData fishLogData)
 		{
 			PlayerData.LogBook.TryAdd(fishLogData);
-			ViewController.UiController.CaughtFish(fishLogData.Type);
+			PlayerData.FishInventory.TryAdd(fishLogData);
+			ScreenManager.ME_.CaughtFish(fishLogData);
 			Reset(false);
 		}
 
 		private void Reset(bool isInstant)
 		{
-			DebugUtils.Log("reset Rod .........*/!*");
+			RDebugUtils.Log("reset Rod .........*/!*");
 
-			potentialCatch = null;
+			PotentialCatch = null;
 			Energy.Reset();
 			RodLine.Reset();
 
@@ -225,9 +234,9 @@ namespace Assets.Scripts.Rods
 			if (!HasVeiw)
 				return;
 
-			Vector3 endPosittion = potentialCatch == null || RodFloat.IsNibbling ? RodFloat.GetViewWorldPosition() : potentialCatch.GetViewWorldPosition();
+			Vector3 endPosittion = !FishHooked || RodFloat.IsNibbling ? RodFloat.GetViewWorldPosition() : PotentialCatch.GetViewWorldPosition();
 			RodLine.PositionUpdate(view.GetLineStartWorldPosition(), endPosittion);
-			RodLine.ProgressBarUpdate(1 - (Energy.Value / Energy.Max), Energy.IsResting, 0.5f);
+			RodLine.ProgressBarUpdate(1 - (Energy.Value / Energy.Max), Energy.IsResting || Energy.Value == Energy.Max, 0.5f);
 		}
 	}
 }

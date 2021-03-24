@@ -10,7 +10,9 @@ namespace Assets.Scripts.Generic
 
 		public float Max { get; private set; }
 		public float Value { get; private set; }
+		public float NormalisedBlowBack { get; private set; }
 		public bool IsResting { get; private set; }
+		public bool IsPaused { get; set; }
 
 		/// <summary>
 		/// Passive Damage
@@ -19,13 +21,22 @@ namespace Assets.Scripts.Generic
 
 		public Energy(float max, float normalisedBlowBack)
 		{
-			Max = Value = max;
+			Value = max;
+			ResetProperties(max, normalisedBlowBack);
+		}
+
+		public void ResetProperties(float max) => ResetProperties(max, NormalisedBlowBack);
+
+		public void ResetProperties(float max, float normalisedBlowBack)
+		{
+			Max = max;
+			NormalisedBlowBack = normalisedBlowBack;
 			BlowBack = Max * normalisedBlowBack;
 		}
 
 		public void Consume(float value, bool autoRest = true)
 		{
-			if (IsResting)
+			if (IsResting || IsPaused)
 				return;
 
 			Value = Mathf.Max(Value - value, 0);
@@ -36,7 +47,7 @@ namespace Assets.Scripts.Generic
 
 		public void Rest()
 		{
-			if (IsResting)
+			if (IsResting || IsPaused)
 				return;
 
 			IsResting = true;
@@ -54,6 +65,9 @@ namespace Assets.Scripts.Generic
 
 		public void Recover(float value)
 		{
+			if (IsPaused)
+				return;
+
 			Value = Mathf.Min(Max, Value + value);
 			if (Value == Max)
 				IsResting = false;

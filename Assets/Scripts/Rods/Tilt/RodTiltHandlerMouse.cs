@@ -39,5 +39,7 @@ namespace Assets.Scripts.Rods.Tilt
 				yield return null;
 			}
 		}
+
+		public override bool InReservedArea(Vector3 worldPosition) => false;
 	}
 }
