@@ -1,0 +1,165 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: UIAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: DefaultTexturePlatform
+      m_MaxTextureSize: 4096
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: -1
+      m_TextureCompression: 1
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 0
+      enableTightPacking: 0
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 02b172ce9c768844597e4940a23ac45e, type: 3}
+    - {fileID: 102900000, guid: 0da668a27a4ec5e46b8257e1ad6f8a67, type: 3}
+    - {fileID: 102900000, guid: 6e1a42867643dfe47abe5b7ca42f25fd, type: 3}
+    - {fileID: 102900000, guid: b31a16c898b4858488b1317b122ad220, type: 3}
+    - {fileID: 2800000, guid: 7c00be994cac9084aac46449194d0739, type: 3}
+    - {fileID: 2800000, guid: c6397a5b93a30e4449ad55bb6b6ec2e2, type: 3}
+    - {fileID: 2800000, guid: aa6a92528c85d5545aeca8c4981e4835, type: 3}
+    - {fileID: 102900000, guid: 5982d574d5512d04583519fd3cd81b29, type: 3}
+    - {fileID: 2800000, guid: d82bdf60cf83c7d4d84b8914ea129c95, type: 3}
+    - {fileID: 2800000, guid: 3c5967c8d10fdfd41a706077f7944c71, type: 3}
+    - {fileID: 102900000, guid: 4da8f5a39b664eb458021ee4d0329464, type: 3}
+    bindAsDefault: 1
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: e3784a50415c219458735370f3e01969, type: 3}
+  - {fileID: 21300000, guid: d82bdf60cf83c7d4d84b8914ea129c95, type: 3}
+  - {fileID: 21300000, guid: a48ceb70e6f05f9459501fef69c7361e, type: 3}
+  - {fileID: 21300000, guid: 8d1732b0bee0d8f4bad53f44f685ed70, type: 3}
+  - {fileID: 21300000, guid: 803995110b3ff07409a69de923d3a26c, type: 3}
+  - {fileID: 21300000, guid: af650b813b0ca7c4ba4b0a843b1e7a52, type: 3}
+  - {fileID: 21300000, guid: a9efdff1366f17c4a8e586bc503d0025, type: 3}
+  - {fileID: 21300000, guid: b15eab128236e044882ce2167f664952, type: 3}
+  - {fileID: 21300000, guid: aa6a92528c85d5545aeca8c4981e4835, type: 3}
+  - {fileID: 21300000, guid: 405b72b2743c1ac4b97b249fb361ed7c, type: 3}
+  - {fileID: 21300000, guid: be478fb26a7c6fa4497c0b7dc4801682, type: 3}
+  - {fileID: 21300000, guid: aeaf0da3dc5ecb04ea404d219dc40041, type: 3}
+  - {fileID: 21300000, guid: 581f2414fa3340f48b8d6b85d0085873, type: 3}
+  - {fileID: 21300000, guid: 14566d44f506c8b4ca4b829a1f3774e1, type: 3}
+  - {fileID: 21300000, guid: cf78f284dbf76f841851d55d1c938e7e, type: 3}
+  - {fileID: 21300000, guid: c49fbb845acc66345b926ca9f5e972df, type: 3}
+  - {fileID: 21300000, guid: 9aa866e44e36ecf4a9c27ebe66293dea, type: 3}
+  - {fileID: 21300000, guid: 1977f505a7de82e46bf7a5d4da3e386c, type: 3}
+  - {fileID: 21300000, guid: cf851c355b5c5cd43bb5f5ecdef6eb47, type: 3}
+  - {fileID: 21300000, guid: a87fdd451118f974c93e8938db6cde93, type: 3}
+  - {fileID: 21300000, guid: f47ccb652d35c7f4fb720370bc39c6ac, type: 3}
+  - {fileID: 21300000, guid: 11de23957a9896847bf83bb189404aaa, type: 3}
+  - {fileID: 21300000, guid: 7fcac0d543df32e4eb992b3a3089efc2, type: 3}
+  - {fileID: 21300000, guid: c394209617939ce4bb2a0b3e1b5ce668, type: 3}
+  - {fileID: 21300000, guid: 7b9af1d6f214c574bb636d05299f1fdc, type: 3}
+  - {fileID: 21300000, guid: 81295a68903df1245a86d6b03e762d4d, type: 3}
+  - {fileID: 21300000, guid: 3c5967c8d10fdfd41a706077f7944c71, type: 3}
+  - {fileID: 21300000, guid: 7c00be994cac9084aac46449194d0739, type: 3}
+  - {fileID: 21300000, guid: 8367d9e9711f16345a01d25555ea945a, type: 3}
+  - {fileID: 21300000, guid: 50e4642a68568364ab36343277d60713, type: 3}
+  - {fileID: 21300000, guid: 9b2a05fa945525348bc610c9c8848a01, type: 3}
+  - {fileID: 21300000, guid: c6397a5b93a30e4449ad55bb6b6ec2e2, type: 3}
+  - {fileID: 21300000, guid: c2a1566b217ceb2478769a0b4dd8a144, type: 3}
+  - {fileID: 21300000, guid: 8205428b46984b748aba08737e8cd7e6, type: 3}
+  - {fileID: 21300000, guid: 45e8ec1c3c5b0df4b8f68694f53c6796, type: 3}
+  - {fileID: 21300000, guid: af56c33cff1657c4fa37fc34a60519be, type: 3}
+  - {fileID: 21300000, guid: abb07b3cc33324b47aa4f2c48f653cef, type: 3}
+  - {fileID: 21300000, guid: 7d07626c9364aaa48a8c1a81444548b7, type: 3}
+  - {fileID: 21300000, guid: 11e217acaa01233448cab01a1f074b42, type: 3}
+  - {fileID: 21300000, guid: 6cfcb4ccb9286454399f166ec9ad9fa1, type: 3}
+  - {fileID: 21300000, guid: 9369f01d99c54f94499246b19d0d0061, type: 3}
+  - {fileID: 21300000, guid: b222932d373b2364b85092d48193b7ff, type: 3}
+  - {fileID: 21300000, guid: 0c9f0c8d9dcbc804dab9858f216efd6d, type: 3}
+  - {fileID: 21300000, guid: 4b12109deedb6e341b5736abf5dc1c91, type: 3}
+  - {fileID: 21300000, guid: ebaaf80e02f5da7409a0808419a674a4, type: 3}
+  - {fileID: 21300000, guid: e2de9a3e138fc994c8202429deaaf75d, type: 3}
+  - {fileID: 21300000, guid: 8babab8ecf5166746a25d711e6253be3, type: 3}
+  - {fileID: 21300000, guid: 9349ffce790c6dd4493496d783560900, type: 3}
+  - {fileID: 21300000, guid: 4402862f75f07514d8a0ff7c6bbf5fb1, type: 3}
+  - {fileID: 21300000, guid: 88fded5f6a1172a418e9bb2993598ad7, type: 3}
+  - {fileID: 21300000, guid: 8c30087f1436d68479ba9e14e3e08b4e, type: 3}
+  - {fileID: 21300000, guid: fbe0adef467be034faa1351186010ffb, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - fish0004
+  - Tap1
+  - InfoIcon
+  - LogBookIcon
+  - ButtonBackground
+  - fish0020
+  - k3
+  - fish0008
+  - Tab
+  - FrameFull
+  - Weight
+  - fish0012
+  - LocationIcon
+  - RodBasic
+  - PlayIcon
+  - PauseIcon
+  - fish0017
+  - fish0013
+  - fish0003
+  - fish0002
+  - fish0006
+  - k1
+  - k7
+  - Common
+  - k2
+  - k4
+  - Tap2
+  - bucket
+  - fish0010
+  - fish0011
+  - k5
+  - Tab border
+  - Rare
+  - Shiny
+  - Date
+  - fish0014
+  - tistad
+  - fish0018
+  - LogBookThickIcon
+  - fish0005
+  - fish0019
+  - Epic
+  - fish0016
+  - k6
+  - fish0007
+  - SoundIcon
+  - Legendary
+  - fish0015
+  - CloseIcon
+  - fish0009
+  - hook
+  - fish0001
+  m_Tag: UIAtlas
+  m_IsVariant: 0
